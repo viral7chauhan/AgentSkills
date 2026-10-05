@@ -161,13 +161,19 @@ Exceptional: BLOCKED | CANCELLED | SUPERSEDED</pre>
 ./scripts/sdd-trace
 ./scripts/sdd-validate
 ./scripts/sdd-report
+./scripts/sdd-status
+./scripts/sdd-test
+./scripts/sdd-ci-gate
 ./scripts/sdd-mcp-recommend --feature FTR-023
 
 make bootstrap
 make validate
+make test
+make ci-gate
 make report
 make mcp-recommend FEATURE=FTR-023
-</pre></section>
+</pre>
+<p><code>.sdd/project/build.yaml</code> declares how each project builds and tests (SwiftPM, Xcode project, or workspace; scheme; simulator platform). <code>sdd-test</code> runs it and records every test result; <code>sdd-ci-gate</code> clears a feature only when every test case in its test plan passed in that CI run.</p></section>
 
 <section><h2>11. MCP recommendations</h2>
 <p>MCP should supply external context/actions; deterministic scripts and CI should remain responsible for build/test/quality truth.</p>

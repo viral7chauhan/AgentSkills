@@ -7,10 +7,12 @@ Expose every gate as a `Makefile` target and have CI call the same targets, so l
 ```bash
 make validate        # SDD structure, plan fingerprints, traceability, execution evidence
 make status-check    # derived status counts and traceability are current
-make build
-make test
+make test            # build and test as declared in .sdd/project/build.yaml
+make ci-gate         # every claimed feature's test cases passed in this run
 make lint
 ```
+
+`make ci` runs the first four in order. The package's `.github/workflows/sdd-validation.yml` template runs them on every pull request and push to the default branch, with the gate reporting even when tests fail so the log names the uncleared features.
 
 Choose the gates the project enforces from: build, unit tests, integration tests, UI tests where required, lint/format, architecture and static checks, secrets scan, dependency audit, and coverage thresholds. Record the chosen set in `.sdd/project/quality-gates.md`; a gate listed there is a merge blocker.
 

@@ -42,3 +42,25 @@ The templates in `templates/` are the source of truth for each file's sections.
 Record, for each: platform and minimum OS, Swift and Xcode versions, UI frameworks, architecture style and dependency injection, concurrency model, networking, persistence, dependency manager with approved and prohibited SDKs, unit/integration/UI testing tools, lint/format/static analysis, CI/CD provider, observability, feature flags, and media stack where relevant.
 
 A tech-stack change can change MCP recommendations; re-run `./scripts/sdd-mcp-recommend` after editing either file.
+
+## Build and test config
+
+`.sdd/project/build.yaml` tells `make test` and CI how this project builds and tests. It is the only place build commands live, so the same scripts serve every project type. Done when `make test` runs locally, records results in `<output>/test-results.json`, and `make ci-gate` reports each claimed feature.
+
+| Project type | `system` | `path` | `scheme` | `platform` / `device` |
+| --- | --- | --- | --- | --- |
+| Swift package (library, modular app core) | `spm` | package directory, usually `.` | — | ignored; tests run on the host Mac |
+| App in an Xcode project | `xcodeproj` | `App.xcodeproj` | shared app or test scheme | `iOS Simulator` / `iPhone` |
+| App in a workspace (CocoaPods, multi-project) | `xcworkspace` | `App.xcworkspace` | shared scheme | `iOS Simulator` / `iPhone` |
+| iPad-first app | `xcodeproj` or `xcworkspace` | as above | as above | `iOS Simulator` / `iPad` |
+| tvOS app | `xcodeproj` or `xcworkspace` | as above | tvOS scheme | `tvOS Simulator` / `Apple TV` |
+| visionOS or watchOS app | `xcodeproj` or `xcworkspace` | as above | platform scheme | `visionOS Simulator` / `Apple Vision`, `watchOS Simulator` / `Apple Watch` |
+| macOS app or Catalyst | `xcodeproj` or `xcworkspace` | as above | macOS scheme | `macOS` |
+
+Rules that keep results trustworthy:
+
+- The scheme must be **shared** (checked into `xcshareddata/xcschemes`), or CI cannot see it.
+- Run CocoaPods, Tuist, or XcodeGen generation in CI before `make test`; `build.yaml` points at the generated workspace or project.
+- Use `test_plan` when the scheme has several; the gate checks only the tests that ran, so a test plan that skips a feature's tests leaves that feature not cleared.
+- Add `output` (default `build/sdd`) to `.gitignore`.
+- Make the CI job that runs `make ci` a required status check on the default branch, so an uncleared feature cannot merge.

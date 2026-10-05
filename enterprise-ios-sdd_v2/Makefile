@@ -27,6 +27,14 @@ status:
 status-check:
 	@$(SCRIPTS)/sdd-status --check
 
+test:
+	@$(SCRIPTS)/sdd-test
+
+ci-gate:
+	@$(SCRIPTS)/sdd-ci-gate
+
+ci: validate status-check test ci-gate
+
 package-sync-check:
 	@$(SCRIPTS)/package-sync-check
 

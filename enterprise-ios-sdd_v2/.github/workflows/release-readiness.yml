@@ -6,13 +6,21 @@ on:
 jobs:
   readiness:
     runs-on: macos-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - name: SDD validation
-        run: ./scripts/sdd-validate
-      - name: Traceability
-        run: ./scripts/sdd-trace
-      - name: Execution evidence
-        run: ./scripts/sdd-execution-check
-      - name: Build / tests
-        run: echo "Configure project release build and test commands."
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: SDD validation and execution evidence
+        run: make validate
+
+      - name: Check derived status and traceability
+        run: make status-check
+
+      - name: Build and test
+        run: make test
+
+      - name: SDD CI gate
+        run: make ci-gate

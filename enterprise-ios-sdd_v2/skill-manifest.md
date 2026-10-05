@@ -19,6 +19,7 @@
 - `templates/project/objective.md`
 - `templates/project/tech-stack.md`
 - `templates/project/tech-stack.yaml`
+- `templates/project/build.yaml` — how this project builds and tests (SwiftPM, Xcode project, or workspace; platform; scheme)
 - `templates/project/architecture.md`
 - `templates/project/engineering-rules.md`
 - `templates/project/security.md`
@@ -56,6 +57,8 @@
 - `scripts/sdd-validate` — validate project SDD structure and plan fingerprints
 - `scripts/sdd-report` — produce a Tech Lead summary, or write it into a README status table
 - `scripts/sdd-status` — derive `status.yaml` counts and `.sdd/traceability.yaml` from feature artifacts
+- `scripts/sdd-test` — run the tests described in `.sdd/project/build.yaml` and record per-test results
+- `scripts/sdd-ci-gate` — clear a feature only when every test case in its test plan passed in that run
 - `scripts/sdd-mcp-recommend` — recommend MCPs from project tech-stack/feature context
 
 ## Agent adapters
