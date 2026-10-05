@@ -8,9 +8,9 @@ Open `SubscriptionRestore.xcodeproj` in Xcode. The SDD documents are in `.sdd/`.
 
 `FTR-023` Subscription Restore. Spec, clarifications, plan, tasks, and test plan are under `.sdd/features/FTR-023-subscription-restore/`.
 
-Current status is `VALIDATING`, not `CONVERGED`. See `status.yaml`.
+Current status is `CONVERGED`. It is not release-ready. See `status.yaml`.
 
-CI is `.github/workflows/sample-ios-app.yml`. It validates the feature artifacts, runs `swift test`, and runs the Xcode test action on an iPhone simulator. `ci_passed` stays false until that workflow is green.
+CI is [Sample iOS app](https://github.com/viral7chauhan/AgentSkills/actions/runs/37343683468). The workflow validates the feature artifacts, runs `swift test`, and runs the Xcode test action on an iPhone simulator.
 
 ## What ran on 2026-10-05
 

@@ -52,28 +52,28 @@ plan_items:
 tasks:
   - id: T-023-001
     plan_item: P-023-001
-    state: IMPLEMENTED
+    state: VERIFIED
   - id: T-023-002
     plan_item: P-023-002
-    state: IMPLEMENTED
+    state: VERIFIED
   - id: T-023-003
     plan_item: P-023-003
-    state: IMPLEMENTED
+    state: VERIFIED
   - id: T-023-004
     plan_item: P-023-004
-    state: IMPLEMENTED
+    state: VERIFIED
   - id: T-023-005
     plan_item: P-023-005
-    state: IMPLEMENTED
+    state: VERIFIED
   - id: T-023-006
     plan_item: P-023-001
-    state: IMPLEMENTED
+    state: VERIFIED
   - id: T-023-007
     plan_item: P-023-002
-    state: IMPLEMENTED
+    state: VERIFIED
   - id: T-023-008
     plan_item: P-023-003
-    state: IMPLEMENTED
+    state: VERIFIED
 tests:
   - id: TC-023-001
     requirement: FR-023-001
@@ -100,5 +100,10 @@ tests:
     acceptance: AC-023-001
     runner: Swift Testing
     status: pass
-ci_runs: []
+ci_runs:
+  - id: "37343683468"
+    url: https://github.com/viral7chauhan/AgentSkills/actions/runs/37343683468
+    workflow: sample-ios-app.yml
+    conclusion: success
+    date: "2026-10-05"
 prs: []
