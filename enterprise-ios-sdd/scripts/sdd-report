@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""Generate a dependency-free SDD project status report.
+
+The script intentionally uses repository text/YAML-like conventions instead of a third-party
+YAML parser. For authoritative build/test/CI data, wire project-specific adapters into CI.
+"""
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('.sdd/features')
+if not root.exists():
+    print(f"ERROR: feature directory not found: {root}")
+    sys.exit(2)
+
+rows = []
+for feature in sorted(p for p in root.iterdir() if p.is_dir()):
+    status_path = feature / 'status.yaml'
+    execution_path = feature / 'execution.yaml'
+    status = 'UNKNOWN'
+    if status_path.exists():
+        text = status_path.read_text(errors='replace')
+        m = re.search(r'^status:\s*(.+)$', text, re.MULTILINE)
+        if m:
+            status = m.group(1).strip()
+    plan_total = verified = blockers = 0
+    if execution_path.exists():
+        text = execution_path.read_text(errors='replace')
+        plan_total = len(re.findall(r'^  - id:\s*P-', text, re.MULTILINE))
+        verified = len(re.findall(r'^    status:\s*VERIFIED\s*$', text, re.MULTILINE))
+        blockers = len(re.findall(r'^    status:\s*BLOCKED\s*$', text, re.MULTILINE))
+    rows.append((feature.name, status, verified, plan_total, blockers))
+
+print('SDD PROJECT REPORT')
+print('=' * 82)
+print(f"{'FEATURE':42} {'STATUS':16} {'VERIFIED':10} {'BLOCKERS':9}")
+for name, status, verified, total, blockers in rows:
+    ratio = f"{verified}/{total}" if total else '-'
+    print(f"{name:42} {status:16} {ratio:10} {blockers:9}")

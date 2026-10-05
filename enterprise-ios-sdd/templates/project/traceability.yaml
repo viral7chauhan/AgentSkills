@@ -1,0 +1,16 @@
+# Project-wide traceability. Feature-local records can be merged/generated here.
+requirements: []
+
+# Example:
+# - requirement: FR-023-001
+#   acceptance_criteria:
+#     - AC-023-001
+#   tasks:
+#     - T-023-001
+#   implementation:
+#     - Sources/Subscription/SubscriptionRepository.swift
+#   tests:
+#     - TC-023-001
+#   ci:
+#     - run: 8921
+#       status: passed

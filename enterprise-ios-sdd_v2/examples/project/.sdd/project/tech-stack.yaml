@@ -1,0 +1,41 @@
+platform:
+  ios: true
+  tvos: false
+  min_ios: TBD
+  min_tvos: TBD
+language:
+  swift: TBD
+  xcode: TBD
+ui:
+  primary: TBD
+  additional: []
+architecture:
+  style: TBD
+  dependency_injection: TBD
+concurrency:
+  preferred: []
+networking:
+  client: TBD
+  protocol: TBD
+persistence:
+  local: []
+  secure: []
+dependencies:
+  manager: Swift Package Manager
+  approved: []
+  prohibited: []
+testing:
+  unit: XCTest
+  integration: TBD
+  ui: XCUITest
+quality:
+  lint: TBD
+  format: TBD
+  coverage_minimum: TBD
+ci:
+  provider: TBD
+observability:
+  crash: TBD
+  analytics: TBD
+feature_flags: TBD
+media: {}

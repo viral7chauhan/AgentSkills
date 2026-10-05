@@ -1,0 +1,122 @@
+version: 1
+purpose: Map project capabilities and technology stack to MCP integrations without making MCP a hard dependency of the SDD workflow.
+
+policy:
+  prefer_official_or_vendor_maintained: true
+  least_privilege: true
+  read_only_by_default: true
+  require_human_approval_for_write_access: true
+  never_replace_deterministic_ci_with_mcp: true
+
+servers:
+  - id: github
+    name: GitHub MCP Server
+    provider: GitHub
+    maturity: official
+    source: https://github.com/github/github-mcp-server
+    capabilities:
+      - repository_context
+      - code_search
+      - issues
+      - pull_requests
+      - github_actions
+      - code_security
+      - releases
+    recommended_when:
+      tools_or_services: [GitHub, GitHub Actions]
+      workflow_phases: [tasks, implement, review, convergence, release-readiness]
+    permission_profile:
+      discovery: read-only
+      implementation: read/write only when explicitly required
+    notes: Use toolsets to limit enabled capabilities. Prefer the smallest useful permission set.
+
+  - id: figma
+    name: Figma MCP Server
+    provider: Figma
+    maturity: official
+    source: https://developers.figma.com/docs/figma-mcp-server/
+    capabilities:
+      - design_context
+      - components
+      - variables
+      - layout_data
+      - design_to_code_context
+    recommended_when:
+      tech_stack_contains: [SwiftUI, UIKit]
+      project_context_contains: [Figma, design-system]
+      workflow_phases: [specify, plan, implement, review]
+    permission_profile:
+      discovery: read-only
+      write: require explicit approval
+    notes: Prefer Figma's hosted remote MCP server where supported.
+
+  - id: linear
+    name: Linear MCP Server
+    provider: Linear
+    maturity: official
+    source: https://linear.app/docs/mcp
+    capabilities:
+      - issues
+      - projects
+      - comments
+      - product_context
+    recommended_when:
+      tools_or_services: [Linear]
+      workflow_phases: [specify, tasks, release-readiness]
+    permission_profile:
+      discovery: read-only
+      write: require explicit approval
+    notes: Useful when Linear is the product planning system. Do not add it when the team uses another tracker unless needed.
+
+  - id: firebase
+    name: Firebase MCP Server
+    provider: Google Firebase
+    maturity: vendor
+    source: https://firebase.google.com/docs/studio/mcp-servers
+    capabilities:
+      - firestore_context
+      - firebase_project_context
+      - backend_debugging
+    recommended_when:
+      tech_stack_contains: [Firebase, Firestore]
+      workflow_phases: [plan, implement, debugging, validation]
+    permission_profile:
+      discovery: read-only
+      write: require explicit approval
+    notes: Review the exact permissions exposed by the selected Firebase MCP implementation before enabling it.
+
+  - id: playwright
+    name: Playwright MCP
+    provider: Microsoft Playwright
+    maturity: official
+    source: https://playwright.dev/mcp/introduction
+    capabilities:
+      - browser_automation
+      - accessibility_snapshot
+      - web_regression
+    recommended_when:
+      project_context_contains: [web-admin, web-portal, browser-testing]
+      workflow_phases: [test-plan, validation]
+    permission_profile:
+      discovery: read-only where possible
+      execution: controlled test environment
+    notes: Use for browser workflows. For native iOS UI validation, prefer XCUITest plus deterministic xcodebuild/simctl commands.
+
+  - id: internal-ios-build
+    name: Internal iOS Build/Simulator MCP (custom)
+    provider: Project team
+    maturity: custom
+    source: internal
+    capabilities:
+      - xcodebuild
+      - xcrun_simctl
+      - test_execution
+      - build_artifacts
+      - simulator_logs
+    recommended_when:
+      platform: [iOS, tvOS]
+      workflow_phases: [implement, execution-check, validation, convergence]
+    permission_profile:
+      default: local-only
+      write: restrict to test/build workspaces
+    notes: Build and simulator operations are normally better kept as deterministic scripts first. Add an MCP only if the team's agent host cannot safely orchestrate those scripts.

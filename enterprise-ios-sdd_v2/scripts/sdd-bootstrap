@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+import argparse
+import shutil
+from pathlib import Path
+
+ROOT=Path(__file__).resolve().parents[1]
+
+def copy_file(src: Path, dst: Path, force: bool):
+    if dst.exists() and not force:
+        return False
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+    return True
+
+def main():
+    ap=argparse.ArgumentParser(description='Bootstrap Enterprise iOS SDD into the current repository.')
+    ap.add_argument('--force', action='store_true', help='overwrite existing SDD scaffolding files')
+    args=ap.parse_args()
+
+    if not (ROOT/'templates').exists():
+        raise SystemExit('Skill package templates not found')
+
+    created=[]; skipped=[]
+    # Project artifacts
+    mapping={
+        ROOT/'templates/project/constitution.md': Path('.sdd/constitution.md'),
+    }
+    for src in (ROOT/'templates/project').glob('*'):
+        if src.name == 'mcp-registry.yaml' or src.name == 'traceability.yaml':
+            continue
+        mapping[src]=Path('.sdd/project')/src.name
+    mapping[ROOT/'templates/project/mcp-registry.yaml'] = Path('.sdd/mcp-registry.yaml')
+    mapping[ROOT/'templates/project/traceability.yaml'] = Path('.sdd/traceability.yaml')
+    for src in ROOT.joinpath('templates/quality').glob('*'):
+        mapping[src]=Path('.sdd/quality')/src.name
+
+    for src,dst in mapping.items():
+        (created if copy_file(src,dst,args.force) else skipped).append(str(dst))
+
+    for src in [ROOT/'agent/workflow.md', ROOT/'agent/review-rules.md', ROOT/'AGENTS.md', ROOT/'Makefile']:
+        dst=Path(src.name) if src.name in ['AGENTS.md','Makefile'] else Path('agent')/src.name
+        (created if copy_file(src,dst,args.force) else skipped).append(str(dst))
+
+    # Copy templates so the bootstrapped project remains self-contained and agent-agnostic.
+    for src in ROOT.joinpath('templates').rglob('*'):
+        if src.is_file():
+            dst=Path('templates')/src.relative_to(ROOT/'templates')
+            (created if copy_file(src,dst,args.force) else skipped).append(str(dst))
+
+    for src in ROOT.joinpath('scripts').glob('sdd-*'):
+        dst=Path('scripts')/src.name
+        (created if copy_file(src,dst,args.force) else skipped).append(str(dst))
+
+    # Copy CI templates after checking that they exist in the Skill package.
+    for src in [ROOT/'.github/workflows/sdd-validation.yml', ROOT/'.github/workflows/release-readiness.yml']:
+        if src.exists():
+            dst=Path('.github/workflows')/src.name
+            (created if copy_file(src,dst,args.force) else skipped).append(str(dst))
+    print('SDD bootstrap complete.')
+    print(f'Created/updated: {len(created)}')
+    if skipped:
+        print(f'Skipped existing: {len(skipped)}')
+    print('Next: complete .sdd/project/tech-stack.md and constitution.md, then create a feature.')
+
+if __name__=='__main__':
+    main()

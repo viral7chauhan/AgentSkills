@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+"""Suggest MCP integrations from project tech-stack/feature context.
+
+This is intentionally advisory. It never installs or enables an MCP server.
+"""
+from pathlib import Path
+import argparse
+import re
+
+REGISTRY = Path('.sdd/mcp-registry.yaml')
+
+def read(p):
+    return p.read_text().lower() if p.exists() else ''
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--feature', help='FTR-### to include feature spec/plan context')
+    args = ap.parse_args()
+
+    project = '\n'.join([
+        read(Path('.sdd/project/tech-stack.md')),
+        read(Path('.sdd/project/tech-stack.yaml')),
+        read(Path('.sdd/project/architecture.md')),
+    ])
+    feature = ''
+    if args.feature:
+        roots = list(Path('.sdd/features').glob(f'{args.feature}-*'))
+        if roots:
+            feature = '\n'.join(read(roots[0]/x) for x in ['spec.md','plan.md','test-plan.md'])
+    context = project + '\n' + feature
+
+    recs = []
+    if any(k in context for k in ['github', 'github actions', 'pull request', 'ghes']):
+        recs.append(('GitHub MCP Server', 'Repository, PR, issue, Actions, security, and release context', 'Official', 'read-only discovery; narrow write permissions for PR/issue automation'))
+    if any(k in context for k in ['figma', 'design system', 'figjam', 'design-to-code']):
+        recs.append(('Figma MCP Server', 'Design components, variables, layout, and design-to-code context', 'Official/vendor', 'read-only for implementation context; explicit approval for write-to-canvas'))
+    if 'firebase' in context or 'firestore' in context:
+        recs.append(('Firebase MCP Server', 'Firebase/Firestore project and backend debugging context', 'Vendor', 'read-only first; review workspace permissions before write access'))
+    if 'linear' in context:
+        recs.append(('Linear MCP Server', 'Issues, projects, comments, and product planning context', 'Official/vendor', 'read-only first; explicit approval for mutations'))
+    if any(k in context for k in ['playwright', 'web portal', 'admin portal', 'browser', 'browser testing']):
+        recs.append(('Playwright MCP', 'Browser automation and web regression validation', 'Official/vendor', 'use test environment; restrict mutation') )
+    if any(k in context for k in ['ios', 'tvos', 'xcodebuild', 'xcuitest', 'swift']):
+        recs.append(('Internal iOS Build/Simulator MCP (optional)', 'Agent orchestration for xcodebuild/xcrun simctl and simulator logs', 'Custom/internal', 'prefer deterministic scripts first; local/test-only permissions'))
+
+    print('MCP RECOMMENDATIONS')
+    print('===================')
+    if not recs:
+        print('No context-specific MCP recommendation detected.')
+        print('Add/complete .sdd/project/tech-stack.md or select a feature with --feature FTR-###.')
+        return 0
+    for name, why, maturity, permissions in recs:
+        print(f'\n{name} [{maturity}]')
+        print(f'  Why: {why}')
+        print(f'  Permissions: {permissions}')
+    print('\nNote: MCP is an integration layer. Keep build/test/quality decisions in deterministic scripts and CI.')
+    return 0
+
+if __name__ == '__main__':
+    raise SystemExit(main())

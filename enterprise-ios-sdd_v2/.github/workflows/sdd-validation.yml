@@ -1,0 +1,28 @@
+name: SDD Validation
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  sdd:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate SDD structure and plan changes
+        run: ./scripts/sdd-validate
+
+      - name: Traceability
+        run: ./scripts/sdd-trace
+
+      - name: Execution evidence
+        run: ./scripts/sdd-execution-check
+
+      # Wire these to the project's real commands.
+      - name: Build and test placeholder
+        run: |
+          echo "Configure xcodebuild/test/lint/security commands in this workflow."

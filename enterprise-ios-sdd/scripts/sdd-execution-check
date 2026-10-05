@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+FEATURE_DIR="${1:-}"
+if [[ -z "$FEATURE_DIR" ]]; then
+  echo "Usage: $0 .sdd/features/FTR-###-feature-name"
+  exit 2
+fi
+
+if [[ ! -d "$FEATURE_DIR" ]]; then
+  echo "ERROR: feature directory does not exist: $FEATURE_DIR"
+  exit 2
+fi
+
+required=(spec.md plan.md tasks.md test-plan.md execution.yaml status.yaml)
+missing=0
+for f in "${required[@]}"; do
+  if [[ ! -f "$FEATURE_DIR/$f" ]]; then
+    echo "MISSING: $FEATURE_DIR/$f"
+    missing=1
+  fi
+done
+[[ "$missing" -eq 0 ]] || exit 1
+
+file="$FEATURE_DIR/execution.yaml"
+plan_count=$(grep -c '^  - id: P-' "$file" || true)
+verified_count=$(grep -c '^    status: VERIFIED$' "$file" || true)
+blocked_count=$(grep -c '^    status: BLOCKED$' "$file" || true)
+
+if [[ "$plan_count" -eq 0 ]]; then
+  echo "Execution artifact check: FAIL"
+  echo "No plan items found in execution.yaml."
+  exit 1
+fi
+
+# Validate that each VERIFIED item has all required evidence set to true.
+python3 - "$file" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+text = Path(sys.argv[1]).read_text(errors='replace')
+blocks = re.split(r'(?m)^  - id: P-', text)[1:]
+required = ['code_exists', 'behavior_verified', 'tests_exist', 'tests_passed', 'ci_passed', 'architecture_checked', 'scope_checked']
+errors = []
+for raw in blocks:
+    first = raw.splitlines()[0] if raw.splitlines() else ''
+    block = raw
+    m = re.search(r'(?m)^    status:\s*(\S+)', block)
+    status = m.group(1) if m else 'MISSING'
+    pid = 'P-' + first.strip().split()[0] if first.strip() else 'UNKNOWN'
+    if status == 'VERIFIED':
+        for key in required:
+            m = re.search(rf'(?m)^      {re.escape(key)}:\s*(true|false)\s*$', block)
+            if not m:
+                errors.append(f'{pid}: missing evidence {key}')
+            elif m.group(1) != 'true':
+                errors.append(f'{pid}: VERIFIED but {key}=false')
+if errors:
+    print('Execution status: BLOCKED')
+    for e in errors:
+        print('ERROR:', e)
+    sys.exit(1)
+PY
+
+if [[ "$blocked_count" -gt 0 ]]; then
+  echo "Execution artifact check: FAIL"
+  echo "Blocked plan items: $blocked_count"
+  exit 1
+fi
+
+if [[ "$verified_count" -ne "$plan_count" ]]; then
+  echo "Execution artifact check: FAIL"
+  echo "Plan items: $plan_count | Verified: $verified_count | Blocked: $blocked_count"
+  echo "Execution status: NOT_VERIFIED"
+  exit 1
+fi
+
+echo "Execution artifact check: PASS"
+echo "Plan items: $plan_count | Verified: $verified_count | Blocked: $blocked_count"
+echo "Execution status: VERIFIED"

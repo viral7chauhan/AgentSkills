@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+import argparse
+import hashlib
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+def read_field(path: Path, field: str) -> str:
+    if not path.exists():
+        return ""
+    for line in path.read_text().splitlines():
+        if line.startswith(field + ":"):
+            return line.split(":", 1)[1].strip().strip('"')
+    return ""
+
+
+def replace_or_add(path: Path, field: str, value: str):
+    text = path.read_text() if path.exists() else ""
+    pattern = re.compile(rf"^{re.escape(field)}:.*$", re.M)
+    line = f'{field}: "{value}"'
+    if pattern.search(text):
+        text = pattern.sub(line, text)
+    else:
+        text = line + "\n" + text
+    path.write_text(text)
+
+
+def set_status(path: Path, status: str):
+    replace_or_add(path, "status", status)
+
+
+def git_changed(path: Path) -> bool:
+    try:
+        result = subprocess.run(["git", "status", "--porcelain", "--", str(path)], check=False, capture_output=True, text=True)
+        return bool(result.stdout.strip())
+    except FileNotFoundError:
+        return False
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description="Detect feature plan changes and require an explicit lifecycle action.")
+    p.add_argument("--feature", required=True)
+    p.add_argument("--mode", choices=["ask", "implement", "validate", "review"], default="ask")
+    args = p.parse_args()
+
+    roots = list(Path(".sdd/features").glob(f"{args.feature}-*"))
+    if not roots:
+        print(f"Feature not found: {args.feature}", file=sys.stderr)
+        return 2
+    root = roots[0]
+    plan = root / "plan.md"
+    status = root / "status.yaml"
+    execution = root / "execution.yaml"
+    if not plan.exists():
+        print(f"NO_PLAN {args.feature}")
+        return 0
+
+    current = hashlib.sha256(plan.read_bytes()).hexdigest()
+    recorded = read_field(status, "plan_fingerprint") or read_field(execution, "plan_fingerprint")
+    selected = read_field(execution, "selected_action")
+    changed = current != recorded
+
+    # Git status is useful only when a repository has no prior fingerprint (e.g. legacy feature).
+    if not recorded and git_changed(plan):
+        changed = True
+
+    if not changed:
+        print(f"PLAN_UNCHANGED {args.feature}")
+        return 0
+
+    print(f"PLAN_CHANGED {args.feature}")
+    print(f"Current fingerprint: {current}")
+    print(f"Recorded fingerprint: {recorded or '<none>'}")
+    print()
+    print("Required SDLC action:")
+    print("1. IMPLEMENT - reconcile the implementation and run the full feature SDLC")
+    print("2. VALIDATE  - validate the existing implementation against the updated plan")
+    print("3. REVIEW    - analyze impact and update SDD artifacts without changing application code")
+
+    if args.mode == "ask":
+        print("\nBLOCKED: ask the user to select IMPLEMENT, VALIDATE, or REVIEW.")
+        return 10
+
+    previous = recorded
+    replace_or_add(execution, "previous_fingerprint", previous)
+    replace_or_add(execution, "current_fingerprint", current)
+    replace_or_add(execution, "plan_fingerprint", current)
+    replace_or_add(execution, "selected_action", args.mode)
+    replace_or_add(execution, "detected", "true")
+    replace_or_add(execution, "action_required", "false")
+    set_status(execution, "IN_PROGRESS" if args.mode in ("implement", "review") else "VALIDATING")
+
+    # A changed plan must invalidate any previous feature-level completion state.
+    if args.mode == "validate":
+        set_status(status, "VALIDATING")
+    else:
+        set_status(status, "PLANNED")
+    replace_or_add(status, "plan_fingerprint", current)
+
+    if args.mode == "implement":
+        print("MODE=IMPLEMENT selected.")
+        print("Run: analyze → reconcile tasks/test-plan → implement → execution-check → tests/CI → converge.")
+    elif args.mode == "validate":
+        print("MODE=VALIDATE selected.")
+        print("Run: analyze → validate current code/tests against the updated plan → report gaps → converge if clean.")
+    elif args.mode == "review":
+        print("MODE=REVIEW selected.")
+        print("Run: impact analysis → reconcile SDD artifacts → wait for implementation approval.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

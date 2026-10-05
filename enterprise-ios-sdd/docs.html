@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enterprise iOS SDD Skill — Project Guide</title>
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--text:#1f2937;--muted:#64748b;--line:#e2e8f0;--accent:#2563eb;--good:#166534;--warn:#92400e;--bad:#991b1b;--code:#0f172a}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#0f172a;color:white;padding:44px 24px} header .wrap,main{max-width:1100px;margin:auto}.tag{display:inline-block;padding:4px 10px;border-radius:999px;background:#1e40af;font-size:12px}h1{font-size:34px;line-height:1.15;margin:14px 0 8px}h2{margin-top:42px;font-size:25px}h3{margin-top:28px;font-size:19px}p{max-width:900px}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 2px 7px rgba(15,23,42,.04)}.card h3{margin-top:0}.badge{font-size:12px;padding:3px 8px;border-radius:999px;background:#eff6ff;color:#1d4ed8}.good{color:var(--good);font-weight:600}.warn{color:var(--warn);font-weight:600}.bad{color:var(--bad);font-weight:600}pre{background:var(--code);color:#e5e7eb;border-radius:12px;padding:18px;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}table{width:100%;border-collapse:collapse;background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#f1f5f9}nav{position:sticky;top:0;z-index:10;background:rgba(247,248,250,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}nav .wrap{max-width:1100px;margin:auto;padding:10px 24px;display:flex;gap:14px;overflow:auto}nav a{white-space:nowrap;color:#334155;text-decoration:none;font-size:13px}section{scroll-margin-top:60px}.file{border-left:4px solid var(--accent);padding-left:14px}.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}.step{background:white;border:1px solid var(--line);padding:8px 12px;border-radius:9px;font-weight:600}.arrow{color:var(--muted)}.source a{color:var(--accent)}footer{margin-top:50px;padding:30px 24px;background:#0f172a;color:#cbd5e1}ul{padding-left:22px}.small{font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap"><span class="tag">Agent-agnostic • iOS/tvOS • SDD</span><h1>Enterprise iOS Spec-Driven Development Skill</h1><p class="muted" style="color:#cbd5e1">A practical guide to the repository structure, files, workflow, validation model, and reusable skills for agent-assisted development.</p></div></header>
+<nav><div class="wrap"><a href="#model">Model</a><a href="#structure">Structure</a><a href="#scaffold">Scaffolding</a><a href="#files">Files</a><a href="#feature">Feature</a><a href="#trace">Traceability</a><a href="#ci">CI</a><a href="#skills">Skills</a><a href="#adopt">Adoption</a><a href="#sources">Sources</a></div></nav>
+<main class="wrap">
+<section id="model"><h2>1. What this skill is trying to achieve</h2><p>The repository, not the AI coding agent, is the source of truth. The agent reads the project rules and feature specification, creates a plan, implements the approved tasks, runs validation, and converges the code against the specification.</p>
+<div class="flow"><div class="step">Constitution</div><span class="arrow">→</span><div class="step">Specify</div><span class="arrow">→</span><div class="step">Clarify</div><span class="arrow">→</span><div class="step">Plan</div><span class="arrow">→</span><div class="step">Tasks</div><span class="arrow">→</span><div class="step">Implement</div><span class="arrow">→</span><div class="step">CI/Test</div><span class="arrow">→</span><div class="step">Converge</div></div>
+<div class="grid"><div class="card"><h3>Stable</h3><p>Project rules and architecture decisions live in version control and survive agent changes.</p></div><div class="card"><h3>Traceable</h3><p>Requirements connect to acceptance criteria, tasks, implementation, tests, and CI evidence.</p></div><div class="card"><h3>Automatable</h3><p>Scripts and CI can enforce what an agent should not merely claim.</p></div></div></section>
+
+<section id="structure"><h2>2. Recommended project structure</h2><pre>.sdd/
+├── constitution.md
+├── project/
+│   ├── objective.md
+│   ├── tech-stack.md
+│   ├── architecture.md
+│   ├── engineering-rules.md
+│   ├── security.md
+│   ├── performance.md
+│   ├── quality-gates.md
+│   └── release.md
+├── features/
+│   └── FTR-###-feature-name/
+│       ├── spec.md
+│       ├── clarify.md
+│       ├── checklist.md
+│       ├── plan.md
+│       ├── tasks.md
+│       ├── test-plan.md
+│       ├── execution.yaml
+└── status.yaml
+├── adr/
+│   └── ADR-###-short-title.md
+└── traceability.yaml
+
+agent/
+├── workflow.md
+└── review-rules.md
+
+scripts/
+├── sdd-validate
+├── sdd-trace
+└── sdd-report
+
+AGENTS.md
+Makefile
+.github/workflows/
+├── ci.yml
+├── validation.yml
+└── release.yml</pre></section>
+
+<section id="scaffold"><h2>3. Executable feature scaffolding</h2><p>The framework is now intended to be executable as well as documented. Use the included script to create a standard feature directory without manually copying files.</p><pre>./scripts/sdd-feature-create "Subscription Restore"
+
+# or
+./scripts/sdd-feature-create FTR-023 "Subscription Restore"</pre><pre>.sdd/features/FTR-023-subscription-restore/
+├── spec.md
+├── clarify.md
+├── checklist.md
+├── plan.md
+├── tasks.md
+├── test-plan.md
+├── execution.yaml
+└── status.yaml</pre><p>The command only scaffolds artifacts. It must not invent product requirements or modify application code. The templates live under <code>templates/feature/</code>, which keeps the process portable across agents.</p></section>
+
+<section id="files"><h2>3. What each file means</h2>
+<table><thead><tr><th>File</th><th>Purpose</th><th>What to write</th><th>Change frequency</th></tr></thead><tbody>
+<tr><td><code>constitution.md</code></td><td>Non-negotiable project principles.</td><td>Architecture/test/security/quality MUST rules.</td><td>Rare</td></tr>
+<tr><td><code>objective.md</code></td><td>Product context.</td><td>Problem, goals, users, scope, non-goals, success measures.</td><td>Occasional</td></tr>
+<tr><td><code>tech-stack.md</code></td><td>Approved technologies.</td><td>Swift version policy, UI frameworks, SPM, test stack, CI tooling, approved SDKs.</td><td>Occasional</td></tr>
+<tr><td><code>architecture.md</code></td><td>How the system is organized.</td><td>Modules, boundaries, dependency direction, state management, DI, concurrency rules.</td><td>Occasional</td></tr>
+<tr><td><code>engineering-rules.md</code></td><td>Implementation conventions.</td><td>Naming, error handling, logging, API rules, source layout, code review rules.</td><td>Frequent-ish</td></tr>
+<tr><td><code>security.md</code></td><td>Security/privacy constraints.</td><td>Secrets, auth, storage, PII, logging restrictions, dependency concerns.</td><td>Occasional</td></tr>
+<tr><td><code>performance.md</code></td><td>Performance expectations.</td><td>Startup, memory, scrolling, network, media, battery, measurable thresholds where possible.</td><td>Occasional</td></tr>
+<tr><td><code>quality-gates.md</code></td><td>Required checks.</td><td>Build, test, lint, coverage thresholds, static/security checks, release blockers.</td><td>Occasional</td></tr>
+<tr><td><code>release.md</code></td><td>Release process.</td><td>Branching, versioning, signing, environments, rollout, rollback, evidence.</td><td>Occasional</td></tr>
+<tr><td><code>features/.../spec.md</code></td><td>Feature source of intent.</td><td>What/why, requirements, acceptance criteria, edge cases, non-goals.</td><td>Every feature</td></tr>
+<tr><td><code>clarify.md</code></td><td>Ambiguity log.</td><td>Open questions, options, decisions, owners.</td><td>Per feature</td></tr>
+<tr><td><code>checklist.md</code></td><td>Specification/design completeness.</td><td>Quality-of-specification checks; not a substitute for tests.</td><td>Per feature</td></tr>
+<tr><td><code>plan.md</code></td><td>Technical design.</td><td>Components, data/state flow, dependencies, architecture impact, testing strategy.</td><td>Per feature</td></tr>
+<tr><td><code>tasks.md</code></td><td>Executable work breakdown.</td><td>Stable task IDs, dependencies, requirement references, validation steps.</td><td>Per feature</td></tr>
+<tr><td><code>test-plan.md</code></td><td>Verification strategy.</td><td>Unit/integration/UI/performance scenarios mapped to requirements.</td><td>Per feature</td></tr>
+<tr><td><code>status.yaml</code></td><td>Machine-readable state.</td><td>Implementation/test/CI/traceability state and blockers.</td><td>Automated</td></tr>
+<tr><td><code>adr/ADR-###...</code></td><td>Architectural memory.</td><td>Context, decision, alternatives, consequences, references.</td><td>As needed</td></tr>
+<tr><td><code>traceability.yaml</code></td><td>Requirement evidence map.</td><td>Requirement → acceptance → task → implementation → test → CI.</td><td>Automated</td></tr>
+<tr><td><code>agent/workflow.md</code></td><td>Agent operating procedure.</td><td>Which repository artifacts to read and what order to work in.</td><td>Rare</td></tr>
+<tr><td><code>agent/review-rules.md</code></td><td>Review rubric.</td><td>How the agent classifies missing/non-compliant/out-of-scope work.</td><td>Rare</td></tr>
+<tr><td><code>AGENTS.md</code></td><td>Thin agent adapter.</td><td>Where specs live, basic repo commands, critical constraints.</td><td>Rare</td></tr>
+<tr><td><code>Makefile</code></td><td>Stable command interface.</td><td><code>make build</code>, <code>test</code>, <code>validate</code>, <code>traceability</code>.</td><td>Rare</td></tr>
+</tbody></table></section>
+
+<section id="feature"><h2>5. Feature example</h2><div class="file"><h3>FTR-023: Subscription Restore</h3><p><span class="badge">spec.md</span> Focus on <strong>what/why</strong>, not detailed technology choices.</p><pre># Feature: Subscription Restore
+
+## Problem
+Users with an existing App Store entitlement need to recover access
+on a new install or device.
+
+## Functional Requirements
+- FR-023-001: User can initiate subscription restore.
+- FR-023-002: Active entitlement is reflected in application state.
+- FR-023-003: Pending, failed, and unavailable states are handled.
+
+## Acceptance Criteria
+### AC-023-001
+Given an active subscription,
+When the user taps Restore,
+Then the entitlement state is refreshed and the UI reflects access.
+
+### AC-023-002
+Given no active entitlement,
+When restore completes,
+Then the app does not grant premium access.
+
+## Edge Cases
+- pending transaction
+- network unavailable
+- expired subscription
+- StoreKit error</pre></div>
+<div class="file"><h3>plan.md</h3><pre># Implementation Plan
+
+## Existing Components Reused
+Subscription state store, entitlement protocol.
+
+## Components to Change
+SubscriptionRepository, ViewModel, UI state.
+
+## New Components
+StoreKit adapter only if an existing abstraction cannot support restore.
+
+## Testing Strategy
+Mock the repository boundary; add unit coverage for active, none,
+pending, and error states.
+
+## Architecture Impact
+No new module. No third-party dependency.</pre></div>
+<div class="file"><h3>tasks.md</h3><pre>T-023-001 [IMPLEMENTATION]
+Add restore operation to repository boundary.
+Refs: FR-023-001, AC-023-001
+
+T-023-002 [IMPLEMENTATION]
+Map StoreKit result into domain subscription state.
+Refs: FR-023-001, FR-023-002, AC-023-001
+
+T-023-003 [TEST]
+Add tests for active/no-entitlement/pending/error states.
+Refs: AC-023-001, AC-023-002</pre></div></section>
+
+<section id="trace"><h2>6. Traceability model</h2><pre>FR-023-001
+    ↓
+AC-023-001
+    ↓
+T-023-001, T-023-002
+    ↓
+SubscriptionRepository.swift
+    ↓
+TC-023-001
+    ↓
+CI run #8921 = PASSED</pre><p>The agent should report evidence rather than simply saying “implemented.” A missing test or failed CI check is a validation gap.</p></section>
+
+
+<section id="execution"><h2>Execution Verification — Did the Plan Actually Happen?</h2>
+<p>This is the Tech Lead control layer. A checked task is not proof. <code>execution.yaml</code> records evidence for each plan item and distinguishes <strong>IMPLEMENTED</strong> from <strong>VERIFIED</strong>.</p>
+<div class="grid">
+<div class="card"><h3>IMPLEMENTED</h3><p>The agent says the work is present. This is a progress claim.</p></div>
+<div class="card"><h3>VERIFIED</h3><p>Required evidence exists: implementation, tests, validation checks, scope/architecture checks, and CI where applicable.</p></div>
+<div class="card"><h3>BLOCKED</h3><p>Required evidence is missing or a required gate failed. The feature must not be treated as converged.</p></div>
+</div>
+<div class="file"><h3>execution.yaml</h3><pre>feature_id: FTR-023
+
+plan_items:
+  - id: P-023-001
+    description: Add SubscriptionRepository abstraction
+    references:
+      requirements: [FR-023-001]
+      acceptance_criteria: [AC-023-001]
+      tasks: [T-023-001]
+    expected_files:
+      - Sources/Subscription/SubscriptionRepository.swift
+    evidence:
+      code_exists: true
+      behavior_verified: true
+      tests_exist: true
+      tests_passed: true
+      ci_passed: true
+      architecture_checked: true
+      scope_checked: true
+    status: VERIFIED</pre></div>
+<p>Run the structural checks with:</p><pre>make sdd-execution-check FEATURE=.sdd/features/FTR-023-subscription-restore
+make sdd-report</pre>
+</section>
+
+<section id="quality"><h2>Tech Lead Quality Controls</h2>
+<table><thead><tr><th>File</th><th>Purpose</th><th>What belongs there</th></tr></thead><tbody>
+<tr><td><code>definition-of-ready.md</code></td><td>Prevents vague work from entering planning/implementation.</td><td>Objective, scope, requirements, acceptance criteria, edge cases, security, testability.</td></tr>
+<tr><td><code>definition-of-done.md</code></td><td>Defines completion evidence.</td><td>Requirements, tests, CI, architecture, traceability, convergence, approval.</td></tr>
+<tr><td><code>execution-rules.md</code></td><td>Defines evidence requirements for task/plan verification.</td><td>Statuses, required evidence, blockers, exceptions.</td></tr>
+<tr><td><code>release-readiness.md</code></td><td>Aggregates release gates.</td><td>Converged features, green CI, complete traceability, verified rollout/rollback.</td></tr>
+</tbody></table>
+</section>
+
+<section id="ci"><h2>7. CI and convergence</h2><p>Use a stable command surface so different agents can drive the same process.</p><pre>make build
+make test
+make lint
+make format-check
+make validate
+make traceability
+make report</pre><div class="grid"><div class="card"><h3>Agent validation</h3><p>Compare specification, plan, tasks, code, tests, and applicable ADRs.</p></div><div class="card"><h3>CI validation</h3><p>Actually execute build, tests, linting, coverage, security/static checks, and other required gates.</p></div><div class="card"><h3>Convergence</h3><p>Find remaining gaps and create traceable remediation tasks. A feature is complete only when required evidence exists.</p></div></div></section>
+
+<section id="skills"><h2>8. Recommended skill setup</h2><p>Do not make one enormous “iOS super-skill.” Prefer a small set of focused skills. The SDD skill orchestrates the lifecycle; general engineering skills provide domain capabilities.</p>
+<table><thead><tr><th>Skill</th><th>Type</th><th>Purpose</th><th>Trigger</th></tr></thead><tbody>
+<tr><td><code>enterprise-ios-sdd</code></td><td>Agent workflow</td><td>Specify → plan → tasks → implement → validate → converge.</td><td>Feature/project development</td></tr>
+<tr><td><code>ios-repo-bootstrap</code></td><td>Agent workflow</td><td>Inspect an existing repo and initialize project/SDD conventions safely.</td><td>New project or legacy adoption</td></tr>
+<tr><td><code>ios-feature-spec</code></td><td>Agent workflow</td><td>Create/refine feature specs, acceptance criteria, edge cases, and testability.</td><td>New feature/requirement</td></tr>
+<tr><td><code>ios-implementation-plan</code></td><td>Agent workflow</td><td>Turn a feature spec into a concrete architecture-aware plan.</td><td>After specification</td></tr>
+<tr><td><code>ios-code-review</code></td><td>Agent workflow</td><td>Review diffs against architecture, spec, security, and quality rules.</td><td>PR / code change</td></tr>
+<tr><td><code>ios-execution-verification</code></td><td>Agent workflow</td><td>Verify plan items using evidence and keep IMPLEMENTED separate from VERIFIED.</td><td>After implementation</td></tr>
+<tr><td><code>ios-convergence</code></td><td>Agent workflow</td><td>Compare current code to spec/plan/tasks and produce remediation tasks.</td><td>After implementation</td></tr>
+<tr><td><code>swift-testing</code></td><td>General engineering</td><td>Write/maintain unit, integration, UI, async/concurrency, and regression tests.</td><td>Code/test changes</td></tr>
+<tr><td><code>swift-concurrency</code></td><td>General engineering</td><td>Audit async/await, actors, Sendable, isolation, race risks, and legacy bridging.</td><td>Concurrency changes</td></tr>
+<tr><td><code>ios-architecture</code></td><td>General engineering</td><td>Apply module boundaries, DI, MVVM/Clean boundaries, dependency direction, and ADRs.</td><td>Architecture-sensitive work</td></tr>
+<tr><td><code>swiftui-uikit</code></td><td>General engineering</td><td>Handle SwiftUI/UIKit interoperability, navigation, lifecycle, accessibility, and previews.</td><td>UI work</td></tr>
+<tr><td><code>ios-performance</code></td><td>General engineering</td><td>Inspect startup, memory, scrolling, networking, media, and instrumentation requirements.</td><td>Performance-sensitive work</td></tr>
+<tr><td><code>ios-security</code></td><td>General engineering</td><td>Review secrets, auth, keychain/storage, logging, PII, dependencies, and unsafe patterns.</td><td>Security-sensitive work</td></tr>
+<tr><td><code>ios-ci</code></td><td>General engineering</td><td>Maintain xcodebuild/SwiftLint/coverage/reporting and CI quality gates.</td><td>CI or validation work</td></tr>
+<tr><td><code>dependency-audit</code></td><td>General engineering</td><td>Check dependency additions, versions, licensing/security implications, and lockfile consistency.</td><td>Package changes</td></tr>
+<tr><td><code>release-readiness</code></td><td>Agent workflow</td><td>Prepare release checklist/evidence from converged features and CI.</td><td>Release candidate</td></tr>
+</tbody></table>
+<h3>Recommended layering</h3><pre>AGENTS.md
+  ↓
+enterprise-ios-sdd       (orchestrator)
+  ↓
+feature-spec / plan / review / convergence
+  ↓
+ios-architecture
+swift-testing
+swift-concurrency
+ios-performance
+ios-security
+ios-ci
+  ↓
+Makefile + scripts + CI</pre></section>
+
+<section id="adopt"><h2>9. How to adopt this in a real project</h2><div class="grid"><div class="card"><h3>Phase 1 — Baseline</h3><p>Create <code>.sdd/</code>, constitution, objective, tech stack, architecture, quality gates, and thin <code>AGENTS.md</code>.</p></div><div class="card"><h3>Phase 2 — First feature</h3><p>Choose one medium-sized feature and run the full workflow from spec through convergence.</p></div><div class="card"><h3>Phase 3 — Automate</h3><p>Implement traceability and <code>make validate</code>; add GitHub Actions gates.</p></div><div class="card"><h3>Phase 4 — Scale</h3><p>Add reusable skills for review, testing, concurrency, security, performance, dependency audits, and release readiness.</p></div></div><p><strong>Do not start by converting the entire backlog.</strong> Prove the workflow on one feature, then standardize it.</p></section>
+
+<section id="sources"><h2>10. Supported/current documentation</h2><p class="source">The design of this package is informed by the current GitHub Spec Kit and agent-skills documentation available in October 2026.</p><ul>
+<li><a href="https://github.com/github/spec-kit" target="_blank" rel="noreferrer">GitHub Spec Kit — repository and current workflow</a></li>
+<li><a href="https://github.com/github/spec-kit/blob/main/docs/quickstart.md" target="_blank" rel="noreferrer">Spec Kit Quickstart</a></li>
+<li><a href="https://github.com/github/spec-kit/blob/main/docs/reference/agentic-sdd.md" target="_blank" rel="noreferrer">Spec Kit Agentic SDD reference</a></li>
+<li><a href="https://github.com/github/spec-kit/blob/main/templates/commands/converge.md" target="_blank" rel="noreferrer">Spec Kit Convergence command</a></li>
+<li><a href="https://github.com/github/spec-kit/blob/main/docs/concepts/spec-of-specs.md" target="_blank" rel="noreferrer">Spec Kit: Spec of Specs</a></li>
+<li><a href="https://developers.openai.com/api/docs/guides/tools-skills" target="_blank" rel="noreferrer">OpenAI: Agent Skills</a></li>
+<li><a href="https://developers.openai.com/plugins/build/skills" target="_blank" rel="noreferrer">OpenAI: Build Skills</a></li>
+<li><a href="https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills" target="_blank" rel="noreferrer">GitHub Copilot: Agent Skills</a></li>
+<li><a href="https://docs.github.com/en/copilot/how-tos/copilot-in-the-ide/use-copilot-agents/use-custom-agents" target="_blank" rel="noreferrer">GitHub Copilot: Custom Agents</a></li>
+</ul><p class="small muted">Key current SDD idea: define what/why before how, validate requirements/plans before coding, and iterate implementation → convergence until the code matches the intended artifacts.</p></section>
+</main>
+<footer><div class="wrap"><strong>Enterprise iOS SDD Skill</strong><br><span class="small">Keep project truth in the repository. Keep agent-specific instructions thin. Make CI the executable authority.</span></div></footer>
+</body>
+</html>

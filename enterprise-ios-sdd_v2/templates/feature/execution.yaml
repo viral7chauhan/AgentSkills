@@ -1,0 +1,28 @@
+feature_id: FTR-###
+plan_version: 1
+plan_fingerprint: ""
+status: NOT_STARTED
+
+plan_items:
+  - id: P-###-001
+    requirement_ids: [FR-###-001]
+    task_ids: [T-###-001]
+    expected_files: []
+    evidence:
+      code_exists: false
+      implementation_verified: false
+      tests_exist: false
+      tests_passed: false
+      architecture_passed: false
+      scope_passed: false
+      ci_passed: false
+    status: NOT_STARTED
+    notes: ""
+
+plan_change:
+  detected: false
+  action_required: false
+  selected_action: null
+  detected_at: null
+  previous_fingerprint: ""
+  current_fingerprint: ""

@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import re
+
+
+def count(pattern, text):
+    return len(set(re.findall(pattern, text)))
+
+print('SDD PROJECT REPORT')
+print('==================')
+root = Path('.sdd/features')
+features = sorted(root.glob('FTR-*')) if root.exists() else []
+print(f'Features: {len(features)}')
+for f in features:
+    spec = (f/'spec.md').read_text() if (f/'spec.md').exists() else ''
+    plan = (f/'plan.md').read_text() if (f/'plan.md').exists() else ''
+    tasks = (f/'tasks.md').read_text() if (f/'tasks.md').exists() else ''
+    tests = (f/'test-plan.md').read_text() if (f/'test-plan.md').exists() else ''
+    status = (f/'status.yaml').read_text() if (f/'status.yaml').exists() else ''
+    m = re.search(r'^status:\s*(\S+)', status, re.M)
+    st = m.group(1) if m else 'UNKNOWN'
+    print(f'- {f.name}: {st}; FR={count(r"\bFR-[A-Za-z0-9-]+\b", spec)}; P={count(r"\bP-[A-Za-z0-9-]+\b", plan)}; T={count(r"\bT-[A-Za-z0-9-]+\b", tasks)}; TC={count(r"\bTC-[A-Za-z0-9-]+\b", tests)}')

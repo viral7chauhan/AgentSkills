@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+import argparse
+import hashlib
+from pathlib import Path
+import subprocess
+import sys
+
+REQUIRED_ROOT = [
+    '.sdd/constitution.md',
+    '.sdd/project/objective.md',
+    '.sdd/project/tech-stack.md',
+    '.sdd/project/architecture.md',
+    '.sdd/project/engineering-rules.md',
+    '.sdd/project/security.md',
+    '.sdd/project/performance.md',
+    '.sdd/project/quality-gates.md',
+    '.sdd/project/release.md',
+    '.sdd/traceability.yaml',
+    '.sdd/mcp-registry.yaml',
+    '.sdd/quality/definition-of-ready.md',
+    '.sdd/quality/definition-of-done.md',
+    '.sdd/quality/execution-rules.md',
+    '.sdd/quality/release-readiness.md',
+]
+
+
+def run(cmd):
+    return subprocess.run(cmd, check=False)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--spec-only', action='store_true')
+    args = ap.parse_args()
+
+    missing = [p for p in REQUIRED_ROOT if not Path(p).exists()]
+    if missing:
+        print('Missing required project SDD artifacts:')
+        for p in missing: print(f'  - {p}')
+        return 1
+
+    print('Project artifact structure: PASS')
+
+    # Validate plan fingerprints and detect silent plan changes.
+    failures = 0
+    for root in sorted(Path('.sdd/features').glob('FTR-*')) if Path('.sdd/features').exists() else []:
+        plan = root/'plan.md'; status = root/'status.yaml'; execution = root/'execution.yaml'
+        if not plan.exists(): continue
+        fp = hashlib.sha256(plan.read_bytes()).hexdigest()
+        recorded = ''
+        for p in [status, execution]:
+            if p.exists():
+                for line in p.read_text().splitlines():
+                    if line.startswith('plan_fingerprint:'):
+                        recorded = line.split(':',1)[1].strip().strip('"'); break
+            if recorded: break
+        if recorded and fp != recorded:
+            print(f'PLAN CHANGE DETECTED: {root.name}')
+            print('  Action required: implement / validate / review')
+            failures += 1
+
+    if args.spec_only:
+        return 1 if failures else 0
+
+    if failures:
+        print('Validation blocked by plan changes.')
+        return 1
+
+    print('Run repository-specific build/test/lint commands here or through Makefile targets.')
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

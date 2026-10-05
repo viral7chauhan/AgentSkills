@@ -1,0 +1,29 @@
+feature_id: FTR-###
+status: NOT_STARTED
+
+plan_items:
+  - id: P-###-001
+    description: TBD
+    references:
+      requirements: []
+      acceptance_criteria: []
+      tasks: []
+    expected_files: []
+    evidence:
+      code_exists: false
+      behavior_verified: false
+      tests_exist: false
+      tests_passed: false
+      ci_passed: false
+      architecture_checked: false
+      scope_checked: false
+    status: NOT_STARTED
+    notes: ""
+
+verification_summary:
+  plan_items_total: 0
+  plan_items_verified: 0
+  requirements_total: 0
+  requirements_implemented: 0
+  requirements_validated: 0
+  blockers: 0

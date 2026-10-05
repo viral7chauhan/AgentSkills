@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -eq 1 ]]; then
+  FEATURE_ID=""
+  FEATURE_NAME="$1"
+elif [[ $# -eq 2 ]]; then
+  FEATURE_ID="$1"
+  FEATURE_NAME="$2"
+else
+  echo "Usage: $0 \"Feature Name\""
+  echo "   or: $0 FTR-023 \"Feature Name\""
+  exit 2
+fi
+
+if [[ -z "$FEATURE_ID" ]]; then
+  EXISTING_MAX=$(find .sdd/features -maxdepth 1 -type d -name 'FTR-*' 2>/dev/null | sed -E 's#^.*/FTR-([0-9]+)-.*#\1#' | sort -n | tail -1 || true)
+  NEXT=$((10#${EXISTING_MAX:-0} + 1))
+  FEATURE_ID=$(printf 'FTR-%03d' "$NEXT")
+fi
+
+if [[ ! "$FEATURE_ID" =~ ^FTR-[0-9]{3,}$ ]]; then
+  echo "ERROR: feature ID must look like FTR-001"
+  exit 2
+fi
+
+SLUG=$(printf '%s' "$FEATURE_NAME" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//;s/-$//')
+FEATURE_DIR=".sdd/features/${FEATURE_ID}-${SLUG}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+TEMPLATE_DIR="$ROOT_DIR/templates/feature"
+
+if [[ -e "$FEATURE_DIR" ]]; then
+  echo "ERROR: feature already exists: $FEATURE_DIR"
+  exit 1
+fi
+
+mkdir -p "$FEATURE_DIR"
+for f in spec.md clarify.md checklist.md plan.md tasks.md test-plan.md status.yaml execution.yaml; do
+  cp "$TEMPLATE_DIR/$f" "$FEATURE_DIR/$f"
+done
+
+# Replace known placeholders only; do not invent product requirements.
+sed -i.bak \
+  -e "s/FTR-###/${FEATURE_ID}/g" \
+  -e "s/FTR-###/${FEATURE_ID}/g" \
+  "$FEATURE_DIR/status.yaml" "$FEATURE_DIR/execution.yaml"
+rm -f "$FEATURE_DIR"/*.bak
+
+echo "Created $FEATURE_DIR"
+echo "Files: spec.md clarify.md checklist.md plan.md tasks.md test-plan.md status.yaml execution.yaml"

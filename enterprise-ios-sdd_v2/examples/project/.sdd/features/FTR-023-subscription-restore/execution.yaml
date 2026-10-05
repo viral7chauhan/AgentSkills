@@ -1,0 +1,28 @@
+feature_id: FTR-023
+plan_version: 1
+plan_fingerprint: "e2316b34e5ea67ded159fda9464b4ba521d75aa0acd2bd8bca25b0be63cce0c4"
+status: NOT_STARTED
+
+plan_items:
+  - id: P-023-001
+    requirement_ids: [FR-023-001]
+    task_ids: [T-023-001]
+    expected_files: []
+    evidence:
+      code_exists: false
+      implementation_verified: false
+      tests_exist: false
+      tests_passed: false
+      architecture_passed: false
+      scope_passed: false
+      ci_passed: false
+    status: NOT_STARTED
+    notes: ""
+
+plan_change:
+  detected: false
+  action_required: false
+  selected_action: null
+  detected_at: null
+  previous_fingerprint: ""
+  current_fingerprint: ""

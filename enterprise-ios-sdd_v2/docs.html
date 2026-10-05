@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enterprise iOS SDD — Reference Guide</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;margin:0;background:#f6f7f9;color:#1f2937}main{max-width:1100px;margin:0 auto;padding:40px 24px}section,header{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:24px;margin:18px 0;box-shadow:0 2px 8px rgba(0,0,0,.04)}h1,h2,h3{color:#111827}code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}pre{background:#111827;color:#f9fafb;padding:16px;border-radius:10px;overflow:auto}code{background:#eef2ff;padding:2px 5px;border-radius:5px}table{border-collapse:collapse;width:100%;margin:14px 0}th,td{text-align:left;border:1px solid #e5e7eb;padding:9px;vertical-align:top}th{background:#f3f4f6}.badge{display:inline-block;background:#eef2ff;border-radius:999px;padding:3px 9px;margin-right:5px;font-size:12px}a{color:#2563eb}.note{border-left:4px solid #6366f1;padding:10px 14px;background:#f5f3ff}.warn{border-left:4px solid #f59e0b;padding:10px 14px;background:#fffbeb}</style>
+</head>
+<body><main>
+<header>
+<h1>Enterprise iOS Spec-Driven Development (SDD)</h1>
+<p>A reusable, agent-agnostic development framework for enterprise iOS/tvOS projects. The repository holds intent and rules; the agent executes; deterministic tooling and CI provide evidence.</p>
+<div><span class="badge">Agent agnostic</span><span class="badge">iOS / tvOS</span><span class="badge">Traceability</span><span class="badge">Execution evidence</span><span class="badge">Convergence</span></div>
+</header>
+
+<section><h2>1. Core workflow</h2><pre>Constitution
+   ↓
+Feature Spec
+   ↓
+Clarify
+   ↓
+Plan
+   ↓
+Checklist
+   ↓
+Tasks
+   ↓
+Analyze
+   ↓
+Implement
+   ↓
+Execution Check
+   ↓
+Tests / CI
+   ↓
+Converge
+   ↓
+Human Review
+   ↓
+Merge / Release</pre></section>
+
+<section><h2>2. The most important control: plan changes</h2>
+<p>A feature <code>plan.md</code> change is a lifecycle event. It invalidates prior assumptions about what was implemented and verified.</p>
+<pre>plan.md added/changed
+        ↓
+   plan fingerprint changes
+        ↓
+   impact analysis
+        ↓
+   ASK USER
+   ├─ 1 Implement / reconcile + full feature SDLC
+   ├─ 2 Validate existing implementation only
+   └─ 3 Review impact / update artifacts, no code
+        ↓
+ execution evidence + tests + CI + convergence
+</pre>
+<p>The default helper blocks silent continuation:</p>
+<pre>./scripts/sdd-plan-change-check --feature FTR-023
+</pre>
+<p>Explicit modes:</p>
+<pre>./scripts/sdd-plan-change-check --feature FTR-023 --mode implement
+./scripts/sdd-plan-change-check --feature FTR-023 --mode validate
+./scripts/sdd-plan-change-check --feature FTR-023 --mode review</pre>
+<div class="note"><strong>Recommended agent question:</strong> “Plan changed for FTR-023. Should I (1) implement/reconcile and run the full feature SDLC, (2) validate the existing implementation against the updated plan, or (3) review impact only?”</div>
+</section>
+
+<section><h2>3. Canonical project structure</h2><pre>.sdd/
+├── constitution.md
+├── project/
+│   ├── objective.md
+│   ├── tech-stack.md
+│   ├── tech-stack.yaml
+│   ├── architecture.md
+│   ├── engineering-rules.md
+│   ├── security.md
+│   ├── performance.md
+│   ├── quality-gates.md
+│   └── release.md
+├── features/
+│   └── FTR-###-feature-name/
+│       ├── spec.md
+│       ├── clarify.md
+│       ├── checklist.md
+│       ├── plan.md
+│       ├── tasks.md
+│       ├── test-plan.md
+│       ├── execution.yaml
+│       └── status.yaml
+├── adr/
+├── traceability.yaml
+├── mcp-registry.yaml
+└── quality/
+    ├── definition-of-ready.md
+    ├── definition-of-done.md
+    ├── execution-rules.md
+    └── release-readiness.md
+
+agent/
+templates/
+scripts/
+AGENTS.md
+Makefile
+.github/workflows/</pre></section>
+
+<section><h2>4. Project-level files</h2><table><tr><th>File</th><th>Question answered</th><th>Typical contents</th></tr>
+<tr><td><code>constitution.md</code></td><td>What is non-negotiable?</td><td>Architecture principles, security rules, AI rules, testing constraints.</td></tr>
+<tr><td><code>objective.md</code></td><td>Why does the app exist?</td><td>Business problem, users, goals, non-goals, success metrics.</td></tr>
+<tr><td><code>tech-stack.md</code></td><td>What technologies are approved/used?</td><td>Swift/Xcode, iOS/tvOS, SwiftUI/UIKit, networking, persistence, SDKs, testing, CI, observability, feature flags.</td></tr>
+<tr><td><code>tech-stack.yaml</code></td><td>How can automation reason about the stack?</td><td>Structured versions, approved/prohibited dependencies, CI and testing fields.</td></tr>
+<tr><td><code>architecture.md</code></td><td>How is the application structured?</td><td>Layers, modules, dependency direction, boundaries, DI.</td></tr>
+<tr><td><code>engineering-rules.md</code></td><td>How should engineers/agents work?</td><td>Swift practices, testing, dependency policy, scope discipline.</td></tr>
+<tr><td><code>security.md</code></td><td>What security constraints apply?</td><td>Secrets, auth, sensitive data, logging, privacy.</td></tr>
+<tr><td><code>performance.md</code></td><td>What are the performance expectations?</td><td>Startup, memory, scrolling, network, media budgets.</td></tr>
+<tr><td><code>quality-gates.md</code></td><td>What must pass before merge?</td><td>Build, tests, lint, architecture, traceability, security.</td></tr>
+<tr><td><code>release.md</code></td><td>How does work reach users?</td><td>Branches/tags, release gates, rollout and rollback.</td></tr>
+<tr><td><code>adr/</code></td><td>Why did we make a major architectural decision?</td><td>Context, decision, alternatives, consequences, status.</td></tr></table></section>
+
+<section><h2>5. Feature files</h2><table><tr><th>File</th><th>Purpose</th><th>What to write</th></tr>
+<tr><td><code>spec.md</code></td><td>WHAT + WHY</td><td>Problem, objective, scope, FR/NFR, acceptance criteria, edge cases, analytics, security, accessibility.</td></tr>
+<tr><td><code>clarify.md</code></td><td>Resolve ambiguity</td><td>Questions, impact, decisions, status.</td></tr>
+<tr><td><code>checklist.md</code></td><td>Definition of Ready</td><td>Requirement/design/test readiness checks.</td></tr>
+<tr><td><code>plan.md</code></td><td>HOW</td><td>Architecture, modules/files, data flow, dependencies, risks, plan items, testing, scope.</td></tr>
+<tr><td><code>tasks.md</code></td><td>Executable work</td><td>Task IDs mapped to plan items; state and evidence.</td></tr>
+<tr><td><code>test-plan.md</code></td><td>How will we prove it?</td><td>Test IDs mapped to requirements/acceptance criteria and automated targets.</td></tr>
+<tr><td><code>execution.yaml</code></td><td>Did the plan actually execute?</td><td>Plan fingerprint, plan-item evidence, scope, tests, architecture, CI state, selected plan-change action.</td></tr>
+<tr><td><code>status.yaml</code></td><td>Current feature state</td><td>State machine, counts, blockers, plan fingerprint and validation timestamps.</td></tr></table></section>
+
+<section><h2>6. Stable identifiers and traceability</h2><pre>FR-023-001  Requirement
+      ↓
+AC-023-001  Acceptance Criterion
+      ↓
+P-023-001   Plan item
+      ↓
+T-023-001   Task
+      ↓
+Code change
+      ↓
+TC-023-001  Automated test
+      ↓
+CI run
+      ↓
+PR / Release</pre>
+<p>Keep identifiers stable even when wording changes. The identifier is what makes the evidence chain durable.</p></section>
+
+<section><h2>7. Execution evidence</h2>
+<p><strong>Implemented ≠ Verified.</strong></p>
+<p>For each plan item, <code>execution.yaml</code> should record objective evidence. A plan item is verified only when its status is <code>VERIFIED</code> and all required evidence flags are true.</p>
+<table><tr><th>Evidence</th><th>Example</th></tr><tr><td>Code exists</td><td>Expected implementation path or symbol is present.</td></tr><tr><td>Behavior verified</td><td>Implementation matches the plan and acceptance behavior.</td></tr><tr><td>Tests exist</td><td>Mapped XCTest/XCUITest exists.</td></tr><tr><td>Tests pass</td><td>Real execution result, not an agent claim.</td></tr><tr><td>Architecture pass</td><td>Static/import/module checks pass.</td></tr><tr><td>Scope pass</td><td>No forbidden/unplanned paths changed.</td></tr><tr><td>CI pass</td><td>Actual CI run or equivalent evidence.</td></tr></table></section>
+
+<section><h2>8. Status state machine</h2><pre>DRAFT → READY → PLANNED → IN_PROGRESS → VALIDATING → CONVERGED → RELEASE_READY → RELEASED
+
+Exceptional: BLOCKED | CANCELLED | SUPERSEDED</pre>
+<p>A plan change on a converged feature moves it back to a non-converged state. The new plan must be reconciled and revalidated.</p></section>
+
+<section><h2>9. Project bootstrap</h2><p>Use the Skill package to merge the canonical SDD structure into a repository:</p><pre>/path/to/enterprise-ios-sdd/scripts/sdd-bootstrap</pre><p>It creates/merges the project constitution, project context, quality policies, MCP registry, agent adapters, reusable templates, scripts, Makefile, and CI workflow templates. Existing files are preserved by default, so the bootstrapped repository remains self-contained.</p></section>
+
+<section><h2>10. Commands</h2><pre>./scripts/sdd-feature-create FTR-023 "Subscription Restore"
+./scripts/sdd-plan-change-check --feature FTR-023
+./scripts/sdd-execution-check --feature FTR-023
+./scripts/sdd-trace
+./scripts/sdd-validate
+./scripts/sdd-report
+./scripts/sdd-mcp-recommend --feature FTR-023
+
+make bootstrap
+make validate
+make report
+make mcp-recommend FEATURE=FTR-023
+</pre></section>
+
+<section><h2>11. MCP recommendations</h2>
+<p>MCP should supply external context/actions; deterministic scripts and CI should remain responsible for build/test/quality truth.</p>
+<table><tr><th>MCP</th><th>Use when</th><th>What it gives the agent</th><th>Recommended permission</th></tr>
+<tr><td>GitHub MCP Server</td><td>GitHub/GitHub Actions</td><td>Repository, issues, PRs, Actions, security, releases</td><td>Read-only first; narrow write scopes</td></tr>
+<tr><td>Figma MCP Server</td><td>Figma/design-system workflow</td><td>Components, variables, layout, design context</td><td>Read-only for code generation; explicit write approval</td></tr>
+<tr><td>Linear MCP Server</td><td>Team uses Linear</td><td>Issues, projects, comments, product context</td><td>Read-only first</td></tr>
+<tr><td>Firebase MCP Server</td><td>Firebase/Firestore in stack</td><td>Firebase project/backend context</td><td>Read-only first</td></tr>
+<tr><td>Playwright MCP</td><td>Web/admin/browser testing</td><td>Browser automation/accessibility snapshots</td><td>Controlled test environment</td></tr>
+<tr><td>Internal iOS Build/Simulator MCP</td><td>Need agent orchestration of xcodebuild/simctl</td><td>Build/test/simulator/log context</td><td>Local/test-only; scripts preferred</td></tr><tr><td>Community iOS Simulator MCP</td><td>Need interactive simulator screenshots/UI inspection</td><td>Simulator control, screenshots, accessibility/UI interactions</td><td>Optional; pin/review; test devices only</td></tr></table>
+<p>The repository file <code>.sdd/mcp-registry.yaml</code> stores these mappings. <code>sdd-mcp-recommend</code> reads your tech stack and selected feature plan to produce contextual recommendations.</p></section>
+
+<section><h2>12. MCP selection rule</h2><pre>Tech Stack + Feature Plan
+          ↓
+   Required external context?
+          ↓
+       MCP Registry
+          ↓
+ Official/vendor server available?
+          ↓
+   Least privilege profile
+          ↓
+ Human approval for writes
+</pre><div class="warn">Do not add MCP just because it is available. Map every MCP to a concrete need in the project plan. For native iOS builds/tests, deterministic <code>xcodebuild</code>, <code>xcrun simctl</code>, and CI are preferable to making the build system depend on an MCP.</div></section>
+
+<section><h2>13. Recommended skill set</h2>
+<h3>Core workflow skills</h3><pre>enterprise-ios-sdd
+sdd-feature-spec
+sdd-plan
+sdd-code-review
+sdd-convergence
+sdd-release-readiness</pre>
+<h3>General iOS skills</h3><pre>ios-architecture
+swift-testing
+swift-concurrency
+swiftui-uikit
+ios-networking
+ios-performance
+ios-security
+ios-ci
+bug-triage
+dependency-audit</pre>
+<p>Keep the SDD skill as the orchestrator. Keep engineering skills focused and reusable.</p></section>
+
+<section><h2>14. Recommended operating model for a Tech Lead</h2><pre>AI Agent
+  ↓
+Skills = how to work
+  ↓
+.sdd/ = what must be true
+  ↓
+Code + Tests
+  ↓
+Deterministic scripts
+  ↓
+CI
+  ↓
+Convergence report
+  ↓
+Human Tech Lead approval
+</pre><p>The objective is not “AI always gets it right.” The objective is “incorrect work is visible and cannot pass silently.”</p></section>
+
+<section><h2>15. Sources / further reading</h2>
+<ul>
+<li><a href="https://github.com/github/spec-kit">GitHub Spec Kit</a></li>
+<li><a href="https://github.com/github/spec-kit/blob/main/docs/reference/agentic-sdd.md">GitHub Agentic SDD reference</a></li>
+<li><a href="https://github.com/github/spec-kit/blob/main/templates/commands/converge.md">GitHub Converge command</a></li>
+<li><a href="https://github.com/github/spec-kit/blob/main/docs/concepts/spec-of-specs.md">GitHub Spec of Specs</a></li>
+<li><a href="https://developers.openai.com/api/docs/guides/tools-skills">OpenAI Skills guide</a></li>
+<li><a href="https://github.com/github/github-mcp-server">GitHub MCP Server</a></li>
+<li><a href="https://developers.figma.com/docs/figma-mcp-server/">Figma MCP Server</a></li>
+<li><a href="https://linear.app/docs/mcp">Linear MCP Server</a></li>
+<li><a href="https://firebase.google.com/docs/studio/mcp-servers">Firebase MCP guidance</a></li>
+<li><a href="https://playwright.dev/mcp/introduction">Playwright MCP</a></li>
+<li><a href="https://github.com/joshuayoes/ios-simulator-mcp">Community iOS Simulator MCP example</a></li>
+<li><a href="https://github.com/modelcontextprotocol/modelcontextprotocol">Model Context Protocol specification</a></li>
+</ul></section>
+</main></body></html>

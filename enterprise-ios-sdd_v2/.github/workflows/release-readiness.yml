@@ -1,0 +1,18 @@
+name: Release Readiness
+
+on:
+  workflow_dispatch:
+
+jobs:
+  readiness:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: SDD validation
+        run: ./scripts/sdd-validate
+      - name: Traceability
+        run: ./scripts/sdd-trace
+      - name: Execution evidence
+        run: ./scripts/sdd-execution-check
+      - name: Build / tests
+        run: echo "Configure project release build and test commands."

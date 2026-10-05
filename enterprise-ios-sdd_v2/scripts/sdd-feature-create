@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+FEATURE_ID=""
+FEATURE_NAME=""
+
+if [[ $# -eq 1 ]]; then
+  FEATURE_NAME="$1"
+elif [[ $# -ge 2 ]]; then
+  FEATURE_ID="$1"
+  FEATURE_NAME="$2"
+else
+  echo "Usage: $0 [FTR-###] \"Feature Name\"" >&2
+  exit 2
+fi
+
+if [[ -z "$FEATURE_ID" ]]; then
+  # Stable, human-friendly ID. Review/edit before committing if your organization uses a centralized counter.
+  FEATURE_ID="FTR-$(date +%s | tail -c 4)"
+fi
+
+if [[ ! "$FEATURE_ID" =~ ^FTR-[0-9]{3,}$ ]]; then
+  echo "Feature ID must look like FTR-001 or FTR-023." >&2
+  exit 2
+fi
+
+slug=$(printf '%s' "$FEATURE_NAME" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+root=".sdd/features/${FEATURE_ID}-${slug}"
+
+if [[ -e "$root" ]]; then
+  echo "Feature already exists: $root" >&2
+  exit 1
+fi
+
+mkdir -p "$root"
+for f in spec.md clarify.md checklist.md plan.md tasks.md test-plan.md execution.yaml status.yaml; do
+  template="templates/feature/$f"
+  if [[ ! -f "$template" ]]; then
+    template="$(cd "$(dirname "$0")/.." && pwd)/templates/feature/$f"
+  fi
+  if [[ ! -f "$template" ]]; then
+    echo "Missing template: $template" >&2
+    exit 1
+  fi
+  sed -e "s/FTR-###/${FEATURE_ID}/g" "$template" > "$root/$f"
+done
+
+# Replace a few display placeholders.
+sed -i.bak "s/Feature Name/${FEATURE_NAME}/g; s/FTR-###/${FEATURE_ID}/g" "$root/spec.md" "$root/plan.md" "$root/status.yaml" "$root/execution.yaml" "$root/test-plan.md" 2>/dev/null || true
+find "$root" -name '*.bak' -delete
+
+python3 - <<PY
+from pathlib import Path
+root = Path("$root")
+plan = root / "plan.md"
+status = root / "status.yaml"
+execution = root / "execution.yaml"
+# Fingerprint the initial plan so a later edit can be detected deterministically.
+import hashlib
+fp = hashlib.sha256(plan.read_bytes()).hexdigest()
+for path in (status, execution):
+    s = path.read_text()
+    s = s.replace('plan_fingerprint: ""', f'plan_fingerprint: "{fp}"')
+    s = s.replace('current_fingerprint: ""', f'current_fingerprint: "{fp}"')
+    path.write_text(s)
+PY
+
+echo "Created $root"

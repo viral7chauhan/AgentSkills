@@ -1,0 +1,32 @@
+feature_id: FTR-###
+status: NOT_STARTED
+owner: TBD
+phase: SPECIFY
+
+requirements:
+  total: 0
+  implemented: 0
+  validated: 0
+
+acceptance_criteria:
+  total: 0
+  satisfied: 0
+
+tasks:
+  total: 0
+  verified: 0
+  blocked: 0
+
+tests:
+  total: 0
+  passed: 0
+
+ci:
+  status: NOT_RUN
+  run: null
+
+traceability: INCOMPLETE
+convergence: NOT_RUN
+
+blockers: []
+notes: []
