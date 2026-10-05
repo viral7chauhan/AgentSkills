@@ -58,7 +58,7 @@
 ## CI/CD
 
 - Provider: GitHub Actions, workflow `.github/workflows/sample-ios-app.yml`
-- Every push runs the SDD checks and `swift test`. Pull requests, `main`, and manual runs also run `xcodebuild test` on an iPhone simulator
+- Every push and pull request runs the SDD checks and `swift test`, then `xcodebuild test` on an iPhone simulator
 - Distribution: simulator only. No TestFlight or App Store upload
 
 ## Observability

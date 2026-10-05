@@ -5,7 +5,7 @@ Gates for this sample:
 - Domain unit tests pass via `swift test` (every push)
 - SDD structure, traceability, and execution evidence pass via `make validate` (every push)
 - Derived status counts, `traceability.yaml`, and the README table are current via `make status-check` and `make readme-check` (every push)
-- The iOS app target builds and its test action passes on a simulator (pull requests, `main`, manual runs)
+- The iOS app target builds and its test action passes on a simulator (every push, after the checks above)
 - No new package dependencies
 
 Workflow: `.github/workflows/sample-ios-app.yml`

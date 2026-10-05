@@ -56,7 +56,6 @@ jobs:
   simulator:
     name: Xcode build and test on simulator
     needs: checks
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: macos-latest
     timeout-minutes: 45
     steps:
