@@ -51,10 +51,10 @@ jobs:
           restore-keys: swiftpm-${{ runner.os }}-
 
       - name: Run Swift Testing
-        run: swift test
+        run: make unit-test
 
   simulator:
-    name: Xcode build and test on simulator
+    name: Xcode build, test, and SDD CI gate
     needs: checks
     runs-on: macos-latest
     timeout-minutes: 45
@@ -71,7 +71,7 @@ jobs:
       - name: Restore DerivedData cache
         uses: actions/cache@v4
         with:
-          path: sample-ios-app/DerivedData
+          path: sample-ios-app/build/sdd/DerivedData
           key: deriveddata-${{ runner.os }}-${{ hashFiles('sample-ios-app/SubscriptionRestore.xcodeproj/project.pbxproj', 'sample-ios-app/App/**', 'sample-ios-app/Sources/**', 'sample-ios-app/Tests/**') }}
           restore-keys: deriveddata-${{ runner.os }}-
 
@@ -82,28 +82,11 @@ jobs:
             xcodebuild -downloadPlatform iOS
           fi
 
+      # Runs the project, scheme, and simulator declared in .sdd/project/build.yaml.
       - name: Build the app and run tests on the simulator
-        run: |
-          set -euo pipefail
-          UDID=$(python3 - <<'PY'
-          import json, subprocess, sys
-          raw = subprocess.check_output(["xcrun", "simctl", "list", "devices", "available", "-j"])
-          data = json.loads(raw)
-          for runtime, devices in data.get("devices", {}).items():
-              if "iOS" not in runtime:
-                  continue
-              for device in devices:
-                  if device.get("isAvailable") and str(device.get("name", "")).startswith("iPhone"):
-                      print(device["udid"])
-                      sys.exit(0)
-          sys.exit("No available iPhone simulator")
-          PY
-          )
-          echo "Simulator: $UDID"
-          xcodebuild \
-            -project SubscriptionRestore.xcodeproj \
-            -scheme SubscriptionRestore \
-            -destination "platform=iOS Simulator,id=$UDID" \
-            -derivedDataPath DerivedData \
-            CODE_SIGNING_ALLOWED=NO \
-            test
+        run: make test
+
+      # A feature that claims VERIFIED or CONVERGED fails here unless every test case in its test plan passed above.
+      - name: SDD CI gate
+        if: success() || failure()
+        run: make ci-gate

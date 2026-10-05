@@ -1,10 +1,18 @@
 SDD_SCRIPTS := ../enterprise-ios-sdd_v2/scripts
 FEATURE ?=
 
-.PHONY: test build spec-check traceability execution-check validate report status status-check readme readme-check plan-change
+.PHONY: test unit-test ci-gate ci build spec-check traceability execution-check validate report status status-check readme readme-check plan-change
 
 test:
+	@python3 $(SDD_SCRIPTS)/sdd-test
+
+unit-test:
 	swift test
+
+ci-gate:
+	@python3 $(SDD_SCRIPTS)/sdd-ci-gate
+
+ci: validate status-check readme-check test ci-gate
 
 build:
 	xcodebuild \

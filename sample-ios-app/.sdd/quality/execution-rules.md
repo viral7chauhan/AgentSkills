@@ -8,3 +8,5 @@
 6. Scope expansion must be explicit.
 
 Local `swift test` may set `tests_passed`. It must not set `ci_passed`.
+
+7. A feature is verified only when CI's `make ci-gate` reports it `CLEARED`: every test case's target test passed in that run.

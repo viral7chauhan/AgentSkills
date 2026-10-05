@@ -60,7 +60,7 @@ Plan version 2 is approved. Version 2 moved the tests from XCTest to Swift Testi
 | `swift test` | 10 Swift Testing tests in 3 suites passed |
 | Xcode Run and Test | Passed on a simulator, run manually |
 | GitHub Actions [run 37343683468](https://github.com/viral7chauhan/AgentSkills/actions/runs/37343683468) | First green run, recorded as convergence evidence: artifact check, `swift test`, `xcodebuild test` |
-| Every push and pull request | CI runs `make validate`, `make status-check`, `make readme-check`, and `swift test`, then `xcodebuild test` on a simulator. See the [workflow history](https://github.com/viral7chauhan/AgentSkills/actions/workflows/sample-ios-app.yml) |
+| Every push and pull request | CI runs `make validate`, `make status-check`, `make readme-check`, and `swift test`, then `make test` (the Xcode test on a simulator) and `make ci-gate`. The gate fails CI if any FTR-023 test case did not pass in that run. See the [workflow history](https://github.com/viral7chauhan/AgentSkills/actions/workflows/sample-ios-app.yml) |
 
 ## Before release
 
@@ -94,10 +94,13 @@ make status                            # regenerate status.yaml counts and trace
 make readme                            # make status, then regenerate the status table above
 make plan-change                       # has any plan.md changed since it was approved?
 make plan-change FEATURE=FTR-023       # the same check for one feature
-make test                              # swift test
+make unit-test                         # swift test (fast, no simulator)
+make test                              # Xcode test on a simulator, as declared in .sdd/project/build.yaml
+make ci-gate                           # is every claimed feature's test case passing in that run?
+make ci                                # everything CI runs, in order
 ```
 
-The SDD targets do not build or test the app. `make test`, Xcode, and CI do that.
+`make validate` and the other SDD targets check the documents. `make test` builds and tests the app, and `make ci-gate` ties the two together: a feature counts as verified only when every test case in its test plan passed in CI.
 
 The counts in `status.yaml` and all of `.sdd/traceability.yaml` are generated. Edit only the source files (`spec.md`, `plan.md`, task states in `tasks.md`, results in `test-plan.md`, evidence in `execution.yaml`), then run `make readme` and commit everything it changed. Add CI runs to `ci_runs` in `traceability.yaml` by hand.
 
