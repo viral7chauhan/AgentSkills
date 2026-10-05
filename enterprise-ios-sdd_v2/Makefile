@@ -11,7 +11,7 @@ traceability:
 	@$(SCRIPTS)/sdd-trace
 
 execution-check:
-	@$(SCRIPTS)/sdd-execution-check
+	@$(SCRIPTS)/sdd-execution-check $(if $(FEATURE),--feature $(FEATURE),)
 
 validate:
 	@$(SCRIPTS)/sdd-validate

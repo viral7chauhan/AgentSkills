@@ -2,23 +2,19 @@
 
 iOS 17 SwiftUI app that carries one feature through spec-driven development. The SDD documents in `.sdd/` are the source of truth. This page summarizes them for review.
 
-Last updated: 2026-10-05
-
 ## Status at a glance
 
-| Feature | Status | CI | Release ready |
-| --- | --- | --- | --- |
-| FTR-023 Subscription Restore | `CONVERGED` | [Passing](https://github.com/viral7chauhan/AgentSkills/actions/runs/37344194740) | No |
+The table below is generated from each feature's `status.yaml` by `make readme`. Do not edit it by hand. CI runs `make readme-check` and fails if it is out of date.
+
+<!-- sdd-report:start -->
+| Feature | Status | Requirements verified | Plan items verified | Tasks verified | Tests passing | CI | Release ready |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| FTR-023: Subscription Restore | `CONVERGED` | 4 of 4 | 5 of 5 | 8 of 8 | 5 of 5 | `success` | No |
+<!-- sdd-report:end -->
+
+Current CI: [Sample iOS app workflow](https://github.com/viral7chauhan/AgentSkills/actions/workflows/sample-ios-app.yml)
 
 `CONVERGED` means every requirement traces to a plan item, a task, a passing test, and a green CI run. It does not mean the feature can ship. The open items are listed under [Before release](#before-release).
-
-| Measure | Done |
-| --- | --- |
-| Requirements verified | 4 of 4 |
-| Plan items verified | 5 of 5 |
-| Tasks verified | 8 of 8 |
-| Test cases passing | 5 of 5 |
-| Open clarifications | 0 of 4 |
 
 Branch: `sample/subscription-restore`. It is not merged to `main`, and no pull request is open yet.
 
@@ -63,9 +59,8 @@ Plan version 2 is approved. Version 2 moved the tests from XCTest to Swift Testi
 | --- | --- |
 | `swift test` | 10 Swift Testing tests in 3 suites passed |
 | Xcode Run and Test | Passed on a simulator, run manually |
-| GitHub Actions [run 37343683468](https://github.com/viral7chauhan/AgentSkills/actions/runs/37343683468) | Passed: artifact check, `swift test`, `xcodebuild test` |
-| GitHub Actions [run 37344194740](https://github.com/viral7chauhan/AgentSkills/actions/runs/37344194740) | Passed on the latest commit |
-| Plan fingerprint check | Unchanged since version 2 was approved |
+| GitHub Actions [run 37343683468](https://github.com/viral7chauhan/AgentSkills/actions/runs/37343683468) | First green run, recorded as convergence evidence: artifact check, `swift test`, `xcodebuild test` |
+| Every later push | CI reruns `make validate`, `make readme-check`, `swift test`, and `xcodebuild test`. See the [workflow history](https://github.com/viral7chauhan/AgentSkills/actions/workflows/sample-ios-app.yml) |
 
 ## Before release
 
@@ -91,14 +86,19 @@ Plan version 2 is approved. Version 2 moved the tests from XCTest to Swift Testi
 From `sample-ios-app/`:
 
 ```bash
-make validate         # structure, traceability, and execution evidence
-make execution-check  # every plan item VERIFIED with all evidence true
-make report           # one status line per feature
-make plan-change      # has plan.md changed since it was approved?
-make test             # swift test
+make validate                          # structure, traceability, and execution evidence for all features
+make execution-check                   # every plan item VERIFIED with all evidence true
+make execution-check FEATURE=FTR-023   # the same check for one feature
+make report                            # one status line per feature
+make readme                            # regenerate the status table above
+make plan-change                       # has any plan.md changed since it was approved?
+make plan-change FEATURE=FTR-023       # the same check for one feature
+make test                              # swift test
 ```
 
 The SDD targets do not build or test the app. `make test`, Xcode, and CI do that.
+
+After you change any `status.yaml`, run `make readme` and commit the README with it.
 
 If the plan check prints `PLAN_CHANGED`, the earlier evidence is stale. Choose implement, validate, or review before treating the feature as converged again.
 
@@ -106,4 +106,4 @@ If the plan check prints `PLAN_CHANGED`, the earlier evidence is stale. Choose i
 
 Open `SubscriptionRestore.xcodeproj` in Xcode and use Run or Test. Signing is off, so a simulator build does not need a team. Turn signing on before installing on a device.
 
-CI is defined in `.github/workflows/sample-ios-app.yml`. It runs on pushes and pull requests that touch `sample-ios-app/`.
+CI is defined in `.github/workflows/sample-ios-app.yml`. It runs on pushes and pull requests that touch `sample-ios-app/` or the SDD scripts it uses.

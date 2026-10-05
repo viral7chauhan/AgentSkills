@@ -7,10 +7,12 @@ on:
       - main
     paths:
       - "sample-ios-app/**"
+      - "enterprise-ios-sdd_v2/scripts/**"
       - ".github/workflows/sample-ios-app.yml"
   pull_request:
     paths:
       - "sample-ios-app/**"
+      - "enterprise-ios-sdd_v2/scripts/**"
       - ".github/workflows/sample-ios-app.yml"
 
 jobs:
@@ -25,10 +27,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate feature artifacts
-        run: |
-          python3 ../enterprise-ios-sdd_v2/scripts/sdd-validate --spec-only
-          python3 ../enterprise-ios-sdd_v2/scripts/sdd-plan-change-check --feature FTR-023
+      - name: Validate SDD artifacts and execution evidence
+        run: make validate
+
+      - name: Check README status table
+        run: make readme-check
 
       - name: Run Swift Testing
         run: swift test

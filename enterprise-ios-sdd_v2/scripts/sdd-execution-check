@@ -60,6 +60,9 @@ def main():
         roots = sorted(Path('.sdd/features').glob('FTR-*')) if Path('.sdd/features').exists() else []
 
     if not roots:
+        if args.feature:
+            print(f'Feature not found: {args.feature}')
+            return 2
         print('No feature folders found.')
         return 0
 
