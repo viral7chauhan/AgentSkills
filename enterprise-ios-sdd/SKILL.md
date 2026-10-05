@@ -1,6 +1,6 @@
 ---
-name: enterprise-ios-sdd
-description: Run an agent-agnostic, specification-driven development workflow for enterprise iOS/tvOS projects. Use when bootstrapping a project SDD structure, creating or updating feature specifications, clarifying requirements, producing technical plans and tasks, implementing against approved specifications, validating code and tests, checking traceability, or running convergence and CI quality gates.
+name: enterprise-ios-sdd-v1
+description: Archived v1 of the enterprise-ios-sdd skill, kept for reference. Use only when the user explicitly asks for the v1 package; all current `.sdd/` work uses enterprise-ios-sdd.
 ---
 
 # Enterprise iOS Spec-Driven Development (SDD) Skill
