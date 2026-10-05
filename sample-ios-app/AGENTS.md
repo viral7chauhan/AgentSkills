@@ -16,3 +16,5 @@ Do not invent product behavior. Open questions belong in `clarify.md` until a hu
 Stay inside the feature plan `allowed_paths`. A plan change is a lifecycle event: stop and ask whether to implement, validate, or review.
 
 `IMPLEMENTED` is not `VERIFIED`. Record evidence from `swift test` or `xcodebuild test`. Do not mark CI as passed unless a CI run actually passed.
+
+Edit only source facts: task states, test results, and `execution.yaml` evidence. Then run `make readme`, which regenerates the `status.yaml` counts, `.sdd/traceability.yaml`, and the README status table.

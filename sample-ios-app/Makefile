@@ -1,7 +1,7 @@
 SDD_SCRIPTS := ../enterprise-ios-sdd_v2/scripts
 FEATURE ?=
 
-.PHONY: test build spec-check traceability execution-check validate report readme readme-check plan-change
+.PHONY: test build spec-check traceability execution-check validate report status status-check readme readme-check plan-change
 
 test:
 	swift test
@@ -32,7 +32,13 @@ validate:
 report:
 	@python3 $(SDD_SCRIPTS)/sdd-report
 
-readme:
+status:
+	@python3 $(SDD_SCRIPTS)/sdd-status
+
+status-check:
+	@python3 $(SDD_SCRIPTS)/sdd-status --check
+
+readme: status
 	@python3 $(SDD_SCRIPTS)/sdd-report --update-readme README.md
 
 readme-check:

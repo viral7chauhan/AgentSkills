@@ -10,7 +10,7 @@ required_templates = [
 ]
 feature_templates = ['spec.md','clarify.md','checklist.md','plan.md','tasks.md','test-plan.md','execution.yaml','status.yaml']
 quality_templates=['definition-of-ready.md','definition-of-done.md','execution-rules.md','release-readiness.md']
-scripts=['sdd-bootstrap','sdd-feature-create','sdd-plan-change-check','sdd-execution-check','sdd-trace','sdd-validate','sdd-report','sdd-mcp-recommend']
+scripts=['sdd-bootstrap','sdd-feature-create','sdd-plan-change-check','sdd-execution-check','sdd-trace','sdd-validate','sdd-report','sdd-status','sdd-mcp-recommend']
 errors=[]
 for f in required_templates:
     if not (ROOT/'templates/project'/f).exists(): errors.append('missing template: '+f)

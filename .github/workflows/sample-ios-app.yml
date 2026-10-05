@@ -3,8 +3,9 @@ name: Sample iOS app
 on:
   push:
     branches:
-      - sample/subscription-restore
       - main
+      - "sample/**"
+      - "improve/**"
     paths:
       - "sample-ios-app/**"
       - "enterprise-ios-sdd_v2/scripts/**"
@@ -14,15 +15,21 @@ on:
       - "sample-ios-app/**"
       - "enterprise-ios-sdd_v2/scripts/**"
       - ".github/workflows/sample-ios-app.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: sample-ios-app-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: sample-ios-app
 
 jobs:
-  build-and-test:
-    name: Build and test
+  checks:
+    name: SDD checks and Swift Testing
     runs-on: macos-latest
-    timeout-minutes: 45
-    defaults:
-      run:
-        working-directory: sample-ios-app
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,17 +37,44 @@ jobs:
       - name: Validate SDD artifacts and execution evidence
         run: make validate
 
+      - name: Check derived status and traceability
+        run: make status-check
+
       - name: Check README status table
         run: make readme-check
 
+      - name: Restore SwiftPM build cache
+        uses: actions/cache@v4
+        with:
+          path: sample-ios-app/.build
+          key: swiftpm-${{ runner.os }}-${{ hashFiles('sample-ios-app/Package.swift', 'sample-ios-app/Sources/**', 'sample-ios-app/Tests/**') }}
+          restore-keys: swiftpm-${{ runner.os }}-
+
       - name: Run Swift Testing
         run: swift test
+
+  simulator:
+    name: Xcode build and test on simulator
+    needs: checks
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Select Xcode
         run: |
           set -euo pipefail
           sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
           xcodebuild -version
+
+      - name: Restore DerivedData cache
+        uses: actions/cache@v4
+        with:
+          path: sample-ios-app/DerivedData
+          key: deriveddata-${{ runner.os }}-${{ hashFiles('sample-ios-app/SubscriptionRestore.xcodeproj/project.pbxproj', 'sample-ios-app/App/**', 'sample-ios-app/Sources/**', 'sample-ios-app/Tests/**') }}
+          restore-keys: deriveddata-${{ runner.os }}-
 
       - name: Install an iOS simulator if the runner has none
         run: |
@@ -71,5 +105,6 @@ jobs:
             -project SubscriptionRestore.xcodeproj \
             -scheme SubscriptionRestore \
             -destination "platform=iOS Simulator,id=$UDID" \
+            -derivedDataPath DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             test

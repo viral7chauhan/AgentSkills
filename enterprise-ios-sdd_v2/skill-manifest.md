@@ -2,7 +2,8 @@
 
 ## Package root
 
-- `SKILL.md` — reusable agent-agnostic SDD skill
+- `SKILL.md` — reusable agent-agnostic SDD skill (core workflow)
+- `references/` — detail loaded only when a task needs it: scaffolding and stack, MCP, quality gates and release
 - `README.md` — quick start
 - `docs.html` — detailed human-readable reference
 - `mcp-registry.yaml` — MCP capability/risk mapping and official source URLs
@@ -53,7 +54,8 @@
 - `scripts/sdd-execution-check` — validate plan execution evidence
 - `scripts/sdd-trace` — inspect requirement/acceptance/plan/test linkage
 - `scripts/sdd-validate` — validate project SDD structure and plan fingerprints
-- `scripts/sdd-report` — produce a Tech Lead summary
+- `scripts/sdd-report` — produce a Tech Lead summary, or write it into a README status table
+- `scripts/sdd-status` — derive `status.yaml` counts and `.sdd/traceability.yaml` from feature artifacts
 - `scripts/sdd-mcp-recommend` — recommend MCPs from project tech-stack/feature context
 
 ## Agent adapters

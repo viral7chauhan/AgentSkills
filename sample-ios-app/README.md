@@ -60,7 +60,7 @@ Plan version 2 is approved. Version 2 moved the tests from XCTest to Swift Testi
 | `swift test` | 10 Swift Testing tests in 3 suites passed |
 | Xcode Run and Test | Passed on a simulator, run manually |
 | GitHub Actions [run 37343683468](https://github.com/viral7chauhan/AgentSkills/actions/runs/37343683468) | First green run, recorded as convergence evidence: artifact check, `swift test`, `xcodebuild test` |
-| Every later push | CI reruns `make validate`, `make readme-check`, `swift test`, and `xcodebuild test`. See the [workflow history](https://github.com/viral7chauhan/AgentSkills/actions/workflows/sample-ios-app.yml) |
+| Every push | CI runs `make validate`, `make status-check`, `make readme-check`, and `swift test`. Pull requests, `main`, and manual runs also run `xcodebuild test` on a simulator. See the [workflow history](https://github.com/viral7chauhan/AgentSkills/actions/workflows/sample-ios-app.yml) |
 
 ## Before release
 
@@ -90,7 +90,8 @@ make validate                          # structure, traceability, and execution 
 make execution-check                   # every plan item VERIFIED with all evidence true
 make execution-check FEATURE=FTR-023   # the same check for one feature
 make report                            # one status line per feature
-make readme                            # regenerate the status table above
+make status                            # regenerate status.yaml counts and traceability.yaml
+make readme                            # make status, then regenerate the status table above
 make plan-change                       # has any plan.md changed since it was approved?
 make plan-change FEATURE=FTR-023       # the same check for one feature
 make test                              # swift test
@@ -98,7 +99,7 @@ make test                              # swift test
 
 The SDD targets do not build or test the app. `make test`, Xcode, and CI do that.
 
-After you change any `status.yaml`, run `make readme` and commit the README with it.
+The counts in `status.yaml` and all of `.sdd/traceability.yaml` are generated. Edit only the source files (`spec.md`, `plan.md`, task states in `tasks.md`, results in `test-plan.md`, evidence in `execution.yaml`), then run `make readme` and commit everything it changed. Add CI runs to `ci_runs` in `traceability.yaml` by hand.
 
 If the plan check prints `PLAN_CHANGED`, the earlier evidence is stale. Choose implement, validate, or review before treating the feature as converged again.
 
@@ -106,4 +107,4 @@ If the plan check prints `PLAN_CHANGED`, the earlier evidence is stale. Choose i
 
 Open `SubscriptionRestore.xcodeproj` in Xcode and use Run or Test. Signing is off, so a simulator build does not need a team. Turn signing on before installing on a device.
 
-CI is defined in `.github/workflows/sample-ios-app.yml`. It runs on pushes and pull requests that touch `sample-ios-app/` or the SDD scripts it uses.
+CI is defined in `.github/workflows/sample-ios-app.yml`. It runs on pushes and pull requests that touch `sample-ios-app/` or the SDD scripts it uses. The quick checks job runs on every push; the slower simulator job runs on pull requests, on `main`, and when started by hand from the Actions tab.

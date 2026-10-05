@@ -21,6 +21,12 @@ validate:
 report:
 	@$(SCRIPTS)/sdd-report
 
+status:
+	@$(SCRIPTS)/sdd-status
+
+status-check:
+	@$(SCRIPTS)/sdd-status --check
+
 package-sync-check:
 	@$(SCRIPTS)/package-sync-check
 
