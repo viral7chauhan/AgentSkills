@@ -26,7 +26,7 @@ def main():
         ROOT/'templates/project/constitution.md': Path('.sdd/constitution.md'),
     }
     for src in (ROOT/'templates/project').glob('*'):
-        if src.name == 'mcp-registry.yaml' or src.name == 'traceability.yaml':
+        if src.name in ('constitution.md', 'mcp-registry.yaml', 'traceability.yaml'):
             continue
         mapping[src]=Path('.sdd/project')/src.name
     mapping[ROOT/'templates/project/mcp-registry.yaml'] = Path('.sdd/mcp-registry.yaml')
