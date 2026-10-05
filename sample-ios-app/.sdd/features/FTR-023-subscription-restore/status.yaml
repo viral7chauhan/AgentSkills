@@ -1,5 +1,5 @@
 feature_id: FTR-023
-status: BLOCKED
+status: VALIDATING
 plan_version: 2
 plan_fingerprint: "44a8d3d4555e8b255e367af72f3896370cfde3d269bd9d9e18628acf1e1ed4ac"
 requirements_total: 4
@@ -11,10 +11,9 @@ tasks_total: 8
 tasks_verified: 0
 test_cases_total: 5
 test_cases_passing: 5
-ci_status: not_configured
+ci_status: pending
 release_ready: false
 blocking_items:
-  - "xcodebuild is not installed, so the iOS app target and StoreKit adapter were not compiled."
-  - "No CI provider is configured."
-last_validation: "2026-10-05 swift test passed 10 Swift Testing tests. xcodebuild is still unavailable, so the app target was not compiled."
+  - "CI workflow is configured. ci_passed stays false until `.github/workflows/sample-ios-app.yml` finishes green."
+last_validation: "2026-10-05 swift test passed 10 Swift Testing tests. User confirmed the Xcode scheme runs and tests pass."
 last_convergence: null

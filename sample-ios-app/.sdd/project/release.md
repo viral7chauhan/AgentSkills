@@ -6,7 +6,7 @@ This sample is not distributed. There is no release branch.
 
 ## Readiness
 
-Shipping would require FTR-023 to reach `CONVERGED`, which needs a real CI run. Local `swift test` is not that run.
+Shipping would require FTR-023 to reach `CONVERGED`. That needs a green run of `.github/workflows/sample-ios-app.yml`. A local `swift test` or a manual Xcode run is not that run.
 
 ## Rollback
 

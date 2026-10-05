@@ -1,0 +1,72 @@
+name: Sample iOS app
+
+on:
+  push:
+    branches:
+      - sample/subscription-restore
+      - main
+    paths:
+      - "sample-ios-app/**"
+      - ".github/workflows/sample-ios-app.yml"
+  pull_request:
+    paths:
+      - "sample-ios-app/**"
+      - ".github/workflows/sample-ios-app.yml"
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: macos-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: sample-ios-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate feature artifacts
+        run: |
+          python3 ../enterprise-ios-sdd_v2/scripts/sdd-validate --spec-only
+          python3 ../enterprise-ios-sdd_v2/scripts/sdd-plan-change-check --feature FTR-023
+
+      - name: Run Swift Testing
+        run: swift test
+
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Install an iOS simulator if the runner has none
+        run: |
+          set -euo pipefail
+          if ! xcrun simctl list devices available | grep -q "iPhone"; then
+            xcodebuild -downloadPlatform iOS
+          fi
+
+      - name: Build the app and run tests on the simulator
+        run: |
+          set -euo pipefail
+          UDID=$(python3 - <<'PY'
+          import json, subprocess, sys
+          raw = subprocess.check_output(["xcrun", "simctl", "list", "devices", "available", "-j"])
+          data = json.loads(raw)
+          for runtime, devices in data.get("devices", {}).items():
+              if "iOS" not in runtime:
+                  continue
+              for device in devices:
+                  if device.get("isAvailable") and str(device.get("name", "")).startswith("iPhone"):
+                      print(device["udid"])
+                      sys.exit(0)
+          sys.exit("No available iPhone simulator")
+          PY
+          )
+          echo "Simulator: $UDID"
+          xcodebuild \
+            -project SubscriptionRestore.xcodeproj \
+            -scheme SubscriptionRestore \
+            -destination "platform=iOS Simulator,id=$UDID" \
+            CODE_SIGNING_ALLOWED=NO \
+            test

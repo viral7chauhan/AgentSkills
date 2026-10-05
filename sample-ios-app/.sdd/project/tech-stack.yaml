@@ -33,7 +33,7 @@ quality:
   format: none
   coverage_minimum: null
 ci:
-  provider: none
+  provider: GitHub Actions
 observability:
   crash: none
   analytics: local-state-only

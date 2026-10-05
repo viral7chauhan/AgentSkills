@@ -1,7 +1,7 @@
 feature_id: FTR-023
 plan_version: 2
 plan_fingerprint: "44a8d3d4555e8b255e367af72f3896370cfde3d269bd9d9e18628acf1e1ed4ac"
-status: BLOCKED
+status: VALIDATING
 
 plan_items:
   - id: P-023-001
@@ -64,14 +64,14 @@ plan_items:
       - App/StoreKitRestoreAdapter.swift
     evidence:
       code_exists: true
-      implementation_verified: false
+      implementation_verified: true
       tests_exist: false
       tests_passed: false
       architecture_passed: true
       scope_passed: true
       ci_passed: false
     status: IMPLEMENTED
-    notes: "Adapter is the only StoreKit import. It was not compiled. xcodebuild is not installed."
+    notes: "User ran the app in Xcode on 2026-10-05, so the adapter compiled in the app target. It still has no live StoreKit test."
 
   - id: P-023-005
     requirement_ids: [FR-023-001]
@@ -81,14 +81,14 @@ plan_items:
       - App/SubscriptionRestoreApp.swift
     evidence:
       code_exists: true
-      implementation_verified: false
+      implementation_verified: true
       tests_exist: false
       tests_passed: false
       architecture_passed: true
       scope_passed: true
       ci_passed: false
     status: IMPLEMENTED
-    notes: "SwiftUI typecheck with Command Line Tools failed: SwiftUIMacros plugin not found."
+    notes: "User ran the app in Xcode on 2026-10-05. The screen renders view-model state. No XCUITest."
 
 plan_change:
   detected: false
@@ -107,9 +107,12 @@ local_run:
     - command: swift test
       result: pass
       detail: "Swift Testing 2084. 10 tests in 3 suites passed. XCTest suite executed 0 tests."
-    - command: xcodebuild
-      result: not_run
-      detail: "xcodebuild is not installed. xcode-select points at Command Line Tools."
+    - command: "Xcode manual Run and Test"
+      result: pass
+      detail: "User confirmed on 2026-10-05 that the scheme runs and tests pass in Xcode. This is not a CI run."
+    - command: ".github/workflows/sample-ios-app.yml"
+      result: pending
+      detail: "Workflow added. ci_passed stays false until GitHub Actions reports success."
     - command: "swiftc behavior harness over Sources/SubscriptionRestore"
       result: pass
       detail: "Printed ALL_CHECKS_PASSED. Covered TC-023-001, TC-023-002, TC-023-003, TC-023-004, TC-023-005."

@@ -57,8 +57,9 @@
 
 ## CI/CD
 
-- Provider: not configured
-- Distribution: local simulator build only
+- Provider: GitHub Actions, workflow `.github/workflows/sample-ios-app.yml`
+- The workflow checks feature artifacts, runs `swift test`, then `xcodebuild test` on an iPhone simulator
+- Distribution: simulator only. No TestFlight or App Store upload
 
 ## Observability
 
