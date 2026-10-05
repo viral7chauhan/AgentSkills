@@ -85,16 +85,20 @@ Plan version 2 is approved. Version 2 moved the tests from XCTest to Swift Testi
 | What proves each plan item? | `.sdd/features/FTR-023-subscription-restore/execution.yaml` |
 | Does every requirement have a test? | `.sdd/traceability.yaml` |
 | What is the agreed behavior? | `.sdd/features/FTR-023-subscription-restore/spec.md` and `clarify.md` |
-| Did someone change the plan without review? | Run the plan check below |
+| Did someone change the plan without review? | `make plan-change` |
 | Is CI green? | [Sample iOS app workflow](https://github.com/viral7chauhan/AgentSkills/actions/workflows/sample-ios-app.yml) |
 
 From `sample-ios-app/`:
 
 ```bash
-python3 ../enterprise-ios-sdd_v2/scripts/sdd-validate --spec-only
-python3 ../enterprise-ios-sdd_v2/scripts/sdd-plan-change-check --feature FTR-023
-swift test
+make validate         # structure, traceability, and execution evidence
+make execution-check  # every plan item VERIFIED with all evidence true
+make report           # one status line per feature
+make plan-change      # has plan.md changed since it was approved?
+make test             # swift test
 ```
+
+The SDD targets do not build or test the app. `make test`, Xcode, and CI do that.
 
 If the plan check prints `PLAN_CHANGED`, the earlier evidence is stale. Choose implement, validate, or review before treating the feature as converged again.
 

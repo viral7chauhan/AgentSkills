@@ -19,4 +19,8 @@ for f in features:
     status = (f/'status.yaml').read_text() if (f/'status.yaml').exists() else ''
     m = re.search(r'^status:\s*(\S+)', status, re.M)
     st = m.group(1) if m else 'UNKNOWN'
-    print(f'- {f.name}: {st}; FR={count(r"\bFR-[A-Za-z0-9-]+\b", spec)}; P={count(r"\bP-[A-Za-z0-9-]+\b", plan)}; T={count(r"\bT-[A-Za-z0-9-]+\b", tasks)}; TC={count(r"\bTC-[A-Za-z0-9-]+\b", tests)}')
+    fr = count(r"\bFR-[A-Za-z0-9-]+\b", spec)
+    p = count(r"\bP-[A-Za-z0-9-]+\b", plan)
+    t = count(r"\bT-[A-Za-z0-9-]+\b", tasks)
+    tc = count(r"\bTC-[A-Za-z0-9-]+\b", tests)
+    print(f'- {f.name}: {st}; FR={fr}; P={p}; T={t}; TC={tc}')
