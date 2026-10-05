@@ -1,0 +1,36 @@
+version: 1
+purpose: Advisory MCP map for this sample. MCP does not replace swift test or xcodebuild.
+
+policy:
+  prefer_official_or_vendor_maintained: true
+  least_privilege: true
+  read_only_by_default: true
+  require_human_approval_for_write_access: true
+  never_replace_deterministic_ci_with_mcp: true
+
+servers:
+  - id: github
+    name: GitHub MCP Server
+    provider: GitHub
+    maturity: official
+    source: https://github.com/github/github-mcp-server
+    capabilities: [repository_context, pull_requests]
+    recommended_when:
+      tools_or_services: [GitHub]
+      workflow_phases: [review]
+    permission_profile:
+      discovery: read-only
+    notes: Optional. This sample has no CI workflow yet.
+
+  - id: ios-simulator-community
+    name: iOS Simulator MCP
+    provider: Community
+    maturity: community
+    source: https://github.com/joshuayoes/ios-simulator-mcp
+    capabilities: [simulator_control, screenshots]
+    recommended_when:
+      platform: [iOS]
+      workflow_phases: [validation]
+    permission_profile:
+      discovery: local-only
+    notes: Optional. Unit tests are the required evidence for FTR-023.
