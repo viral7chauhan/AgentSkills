@@ -60,7 +60,7 @@ Plan version 2 is approved. Version 2 moved the tests from XCTest to Swift Testi
 | `swift test` | 10 Swift Testing tests in 3 suites passed |
 | Xcode Run and Test | Passed on a simulator, run manually |
 | GitHub Actions [run 37343683468](https://github.com/viral7chauhan/AgentSkills/actions/runs/37343683468) | First green run, recorded as convergence evidence: artifact check, `swift test`, `xcodebuild test` |
-| Every push and pull request | CI runs `make validate`, `make status-check`, `make readme-check`, and `swift test`, then `make test` (the Xcode test on a simulator) and `make ci-gate`. The gate fails CI if any FTR-023 test case did not pass in that run. See the [workflow history](https://github.com/viral7chauhan/AgentSkills/actions/workflows/sample-ios-app.yml) |
+| Pull requests (and pushes to `main`) | CI runs `make validate`, `make status-check`, `make readme-check`, and `swift test`, then `make test` (the Xcode test on a simulator) and `make ci-gate`. The gate fails CI if any FTR-023 test case did not pass in that run. See the [workflow history](https://github.com/viral7chauhan/AgentSkills/actions/workflows/sample-ios-app.yml) |
 
 ## Before release
 
@@ -110,4 +110,4 @@ If the plan check prints `PLAN_CHANGED`, the earlier evidence is stale. Choose i
 
 Open `SubscriptionRestore.xcodeproj` in Xcode and use Run or Test. Signing is off, so a simulator build does not need a team. Turn signing on before installing on a device.
 
-CI is defined in `.github/workflows/sample-ios-app.yml`. It runs on pushes and pull requests that touch `sample-ios-app/` or the SDD scripts it uses. The quick checks job runs first; the simulator job runs after it passes.
+CI is defined in `.github/workflows/sample-ios-app.yml`. It runs on pull requests, and on pushes to `main`, when `sample-ios-app/` or the SDD scripts it uses change. The quick checks job runs first; the simulator job runs after it passes. Feature-branch pushes without a PR do not start a second copy of the same jobs.

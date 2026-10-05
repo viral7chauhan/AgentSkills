@@ -1,11 +1,10 @@
 name: Sample iOS app
 
 on:
+  # Feature branches run once, on the PR. Push-to-main covers merge; workflow_dispatch is for a one-off run.
   push:
     branches:
       - main
-      - "sample/**"
-      - "improve/**"
     paths:
       - "sample-ios-app/**"
       - "enterprise-ios-sdd_v2/scripts/**"
@@ -18,7 +17,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: sample-ios-app-${{ github.ref }}
+  group: sample-ios-app-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 defaults:
