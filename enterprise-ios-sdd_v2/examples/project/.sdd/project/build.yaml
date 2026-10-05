@@ -1,0 +1,11 @@
+# How `make test` and CI build and run this project's tests.
+# system: spm | xcodeproj | xcworkspace
+system: xcworkspace
+path: ExampleApp.xcworkspace
+scheme: ExampleApp
+# iOS Simulator | tvOS Simulator | visionOS Simulator | watchOS Simulator | macOS
+platform: iOS Simulator
+device: iPhone
+test_plan:
+configuration: Debug
+output: build/sdd

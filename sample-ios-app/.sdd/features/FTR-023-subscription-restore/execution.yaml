@@ -1,0 +1,121 @@
+feature_id: FTR-023
+plan_version: 2
+plan_fingerprint: "44a8d3d4555e8b255e367af72f3896370cfde3d269bd9d9e18628acf1e1ed4ac"
+status: CONVERGED
+
+plan_items:
+  - id: P-023-001
+    requirement_ids: [FR-023-001, NFR-023-001]
+    task_ids: [T-023-001, T-023-006]
+    expected_files:
+      - Sources/SubscriptionRestore/SubscriptionRestoring.swift
+      - Sources/SubscriptionRestore/SubscriptionRepository.swift
+      - Tests/SubscriptionRestoreTests/SubscriptionRepositoryTests.swift
+    evidence:
+      code_exists: true
+      implementation_verified: true
+      tests_exist: true
+      tests_passed: true
+      architecture_passed: true
+      scope_passed: true
+      ci_passed: true
+    status: VERIFIED
+    notes: "swift test passed SubscriptionRepositoryTests/activeEntitlementUnlocksWithoutStartingAPurchase. CI run 37343683468."
+
+  - id: P-023-002
+    requirement_ids: [FR-023-001, FR-023-002]
+    task_ids: [T-023-002, T-023-007]
+    expected_files:
+      - Sources/SubscriptionRestore/EntitlementMapping.swift
+      - Sources/SubscriptionRestore/SubscriptionAccess.swift
+      - Tests/SubscriptionRestoreTests/EntitlementMappingTests.swift
+    evidence:
+      code_exists: true
+      implementation_verified: true
+      tests_exist: true
+      tests_passed: true
+      architecture_passed: true
+      scope_passed: true
+      ci_passed: true
+    status: VERIFIED
+    notes: "swift test passed EntitlementMappingTests pending and active-wins cases. CI run 37343683468."
+
+  - id: P-023-003
+    requirement_ids: [FR-023-001, FR-023-002, FR-023-003]
+    task_ids: [T-023-003, T-023-008]
+    expected_files:
+      - Sources/SubscriptionRestore/SubscriptionViewModel.swift
+      - Tests/SubscriptionRestoreTests/SubscriptionViewModelTests.swift
+    evidence:
+      code_exists: true
+      implementation_verified: true
+      tests_exist: true
+      tests_passed: true
+      architecture_passed: true
+      scope_passed: true
+      ci_passed: true
+    status: VERIFIED
+    notes: "swift test passed SubscriptionViewModelTests offline and subscriber cases. CI run 37343683468."
+
+  - id: P-023-004
+    requirement_ids: [FR-023-001, FR-023-003]
+    task_ids: [T-023-004]
+    expected_files:
+      - App/StoreKitRestoreAdapter.swift
+    evidence:
+      code_exists: true
+      implementation_verified: true
+      tests_exist: true
+      tests_passed: true
+      architecture_passed: true
+      scope_passed: true
+      ci_passed: true
+    status: VERIFIED
+    notes: "Decision table is TC-023-002 and TC-023-004. CI run 37343683468 compiled the adapter while building the app test target. No live StoreKit assertion."
+
+  - id: P-023-005
+    requirement_ids: [FR-023-001]
+    task_ids: [T-023-005]
+    expected_files:
+      - App/RestorePurchasesView.swift
+      - App/SubscriptionRestoreApp.swift
+    evidence:
+      code_exists: true
+      implementation_verified: true
+      tests_exist: true
+      tests_passed: true
+      architecture_passed: true
+      scope_passed: true
+      ci_passed: true
+    status: VERIFIED
+    notes: "TC-023-005 covers the copy and unlock flag the screen renders. CI run 37343683468 built the app. No XCUITest."
+
+plan_change:
+  detected: false
+  action_required: false
+  selected_action: implement
+  detected_at: "2026-10-05"
+  previous_fingerprint: "649b8bfb2302027b27ba2e48f58fe357bc7ead1ef7d02318d23282230d274161"
+  current_fingerprint: "44a8d3d4555e8b255e367af72f3896370cfde3d269bd9d9e18628acf1e1ed4ac"
+
+local_run:
+  date: "2026-10-05"
+  developer_dir: /Library/Developer/CommandLineTools
+  commands:
+    - command: swift build
+      result: pass
+    - command: swift test
+      result: pass
+      detail: "Swift Testing 2084. 10 tests in 3 suites passed. XCTest suite executed 0 tests."
+    - command: "Xcode manual Run and Test"
+      result: pass
+      detail: "User confirmed on 2026-10-05 that the scheme runs and tests pass in Xcode. This is not a CI run."
+    - command: ".github/workflows/sample-ios-app.yml"
+      result: pass
+      detail: "https://github.com/viral7chauhan/AgentSkills/actions/runs/37343683468 succeeded. Artifact check, swift test, and xcodebuild test all passed."
+    - command: "swiftc behavior harness over Sources/SubscriptionRestore"
+      result: pass
+      detail: "Printed ALL_CHECKS_PASSED. Covered TC-023-001, TC-023-002, TC-023-003, TC-023-004, TC-023-005."
+    - command: "swiftc -typecheck App and Sources"
+      result: fail
+      detail: "SwiftUI State macro plugin missing under Command Line Tools."

@@ -1,0 +1,91 @@
+name: Sample iOS app
+
+on:
+  # Feature branches run once, on the PR. Push-to-main covers merge; workflow_dispatch is for a one-off run.
+  push:
+    branches:
+      - main
+    paths:
+      - "sample-ios-app/**"
+      - "enterprise-ios-sdd_v2/scripts/**"
+      - ".github/workflows/sample-ios-app.yml"
+  pull_request:
+    paths:
+      - "sample-ios-app/**"
+      - "enterprise-ios-sdd_v2/scripts/**"
+      - ".github/workflows/sample-ios-app.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: sample-ios-app-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: sample-ios-app
+
+jobs:
+  checks:
+    name: SDD checks and Swift Testing
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate SDD artifacts and execution evidence
+        run: make validate
+
+      - name: Check derived status and traceability
+        run: make status-check
+
+      - name: Check README status table
+        run: make readme-check
+
+      - name: Restore SwiftPM build cache
+        uses: actions/cache@v4
+        with:
+          path: sample-ios-app/.build
+          key: swiftpm-${{ runner.os }}-${{ hashFiles('sample-ios-app/Package.swift', 'sample-ios-app/Sources/**', 'sample-ios-app/Tests/**') }}
+          restore-keys: swiftpm-${{ runner.os }}-
+
+      - name: Run Swift Testing
+        run: make unit-test
+
+  simulator:
+    name: Xcode build, test, and SDD CI gate
+    needs: checks
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Restore DerivedData cache
+        uses: actions/cache@v4
+        with:
+          path: sample-ios-app/build/sdd/DerivedData
+          key: deriveddata-${{ runner.os }}-${{ hashFiles('sample-ios-app/SubscriptionRestore.xcodeproj/project.pbxproj', 'sample-ios-app/App/**', 'sample-ios-app/Sources/**', 'sample-ios-app/Tests/**') }}
+          restore-keys: deriveddata-${{ runner.os }}-
+
+      - name: Install an iOS simulator if the runner has none
+        run: |
+          set -euo pipefail
+          if ! xcrun simctl list devices available | grep -q "iPhone"; then
+            xcodebuild -downloadPlatform iOS
+          fi
+
+      # Runs the project, scheme, and simulator declared in .sdd/project/build.yaml.
+      - name: Build the app and run tests on the simulator
+        run: make test
+
+      # A feature that claims VERIFIED or CONVERGED fails here unless every test case in its test plan passed above.
+      - name: SDD CI gate
+        if: success() || failure()
+        run: make ci-gate

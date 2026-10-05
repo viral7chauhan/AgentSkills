@@ -1,22 +1,121 @@
 #!/usr/bin/env python3
-from pathlib import Path
+import argparse
 import re
+import sys
+from pathlib import Path
+
+START = '<!-- sdd-report:start -->'
+END = '<!-- sdd-report:end -->'
 
 
 def count(pattern, text):
     return len(set(re.findall(pattern, text)))
 
-print('SDD PROJECT REPORT')
-print('==================')
-root = Path('.sdd/features')
-features = sorted(root.glob('FTR-*')) if root.exists() else []
-print(f'Features: {len(features)}')
-for f in features:
-    spec = (f/'spec.md').read_text() if (f/'spec.md').exists() else ''
-    plan = (f/'plan.md').read_text() if (f/'plan.md').exists() else ''
-    tasks = (f/'tasks.md').read_text() if (f/'tasks.md').exists() else ''
-    tests = (f/'test-plan.md').read_text() if (f/'test-plan.md').exists() else ''
-    status = (f/'status.yaml').read_text() if (f/'status.yaml').exists() else ''
-    m = re.search(r'^status:\s*(\S+)', status, re.M)
-    st = m.group(1) if m else 'UNKNOWN'
-    print(f'- {f.name}: {st}; FR={count(r"\bFR-[A-Za-z0-9-]+\b", spec)}; P={count(r"\bP-[A-Za-z0-9-]+\b", plan)}; T={count(r"\bT-[A-Za-z0-9-]+\b", tasks)}; TC={count(r"\bTC-[A-Za-z0-9-]+\b", tests)}')
+
+def read(path: Path) -> str:
+    return path.read_text() if path.exists() else ''
+
+
+def field(text: str, name: str) -> str:
+    m = re.search(rf'^{re.escape(name)}:\s*(.*)$', text, re.M)
+    return m.group(1).strip().strip('"') if m else ''
+
+
+def feature_dirs():
+    root = Path('.sdd/features')
+    return sorted(root.glob('FTR-*')) if root.exists() else []
+
+
+def text_report(features):
+    lines = ['SDD PROJECT REPORT', '==================', f'Features: {len(features)}']
+    for f in features:
+        spec, plan = read(f/'spec.md'), read(f/'plan.md')
+        tasks, tests = read(f/'tasks.md'), read(f/'test-plan.md')
+        st = field(read(f/'status.yaml'), 'status') or 'UNKNOWN'
+        fr = count(r"\bFR-[A-Za-z0-9-]+\b", spec)
+        p = count(r"\bP-[A-Za-z0-9-]+\b", plan)
+        t = count(r"\bT-[A-Za-z0-9-]+\b", tasks)
+        tc = count(r"\bTC-[A-Za-z0-9-]+\b", tests)
+        lines.append(f'- {f.name}: {st}; FR={fr}; P={p}; T={t}; TC={tc}')
+    return '\n'.join(lines)
+
+
+def ratio(status: str, done: str, total: str) -> str:
+    d, t = field(status, done), field(status, total)
+    return f'{d} of {t}' if d and t else 'unknown'
+
+
+def markdown_table(features):
+    if not features:
+        return 'No features yet.'
+    rows = [
+        '| Feature | Status | Requirements verified | Plan items verified | Tasks verified | Tests passing | CI | Release ready |',
+        '| --- | --- | --- | --- | --- | --- | --- | --- |',
+    ]
+    for f in features:
+        status = read(f/'status.yaml')
+        heading = re.search(r'^#\s+(.+)$', read(f/'spec.md'), re.M)
+        name = heading.group(1).strip() if heading else f.name
+        release = 'Yes' if field(status, 'release_ready').lower() == 'true' else 'No'
+        rows.append(
+            f"| {name} "
+            f"| `{field(status, 'status') or 'UNKNOWN'}` "
+            f"| {ratio(status, 'requirements_verified', 'requirements_total')} "
+            f"| {ratio(status, 'plan_items_verified', 'plan_items_total')} "
+            f"| {ratio(status, 'tasks_verified', 'tasks_total')} "
+            f"| {ratio(status, 'test_cases_passing', 'test_cases_total')} "
+            f"| `{field(status, 'ci_status') or 'unknown'}` "
+            f"| {release} |"
+        )
+    return '\n'.join(rows)
+
+
+def with_table(readme: str, table: str) -> str:
+    start, end = readme.find(START), readme.find(END)
+    if start == -1 or end == -1 or end < start:
+        raise ValueError(f'README needs {START} and {END} markers around the status table')
+    return readme[:start + len(START)] + '\n' + table + '\n' + readme[end:]
+
+
+def main():
+    ap = argparse.ArgumentParser(description='Report feature status from .sdd/features.')
+    mode = ap.add_mutually_exclusive_group()
+    mode.add_argument('--markdown', action='store_true', help='print the status table as Markdown')
+    mode.add_argument('--update-readme', metavar='PATH', help='rewrite the status table inside PATH')
+    mode.add_argument('--check-readme', metavar='PATH', help='fail if the status table inside PATH is stale')
+    args = ap.parse_args()
+
+    features = feature_dirs()
+
+    if args.markdown:
+        print(markdown_table(features))
+        return 0
+
+    readme_path = args.update_readme or args.check_readme
+    if readme_path:
+        path = Path(readme_path)
+        current = read(path)
+        try:
+            expected = with_table(current, markdown_table(features))
+        except ValueError as error:
+            print(f'{path}: {error}', file=sys.stderr)
+            return 2
+        if args.update_readme:
+            if expected != current:
+                path.write_text(expected)
+                print(f'Updated status table in {path}')
+            else:
+                print(f'Status table in {path} is already current')
+            return 0
+        if expected != current:
+            print(f'{path}: status table is out of date. Run `make readme` and commit the result.', file=sys.stderr)
+            return 1
+        print(f'Status table in {path} matches .sdd/features')
+        return 0
+
+    print(text_report(features))
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

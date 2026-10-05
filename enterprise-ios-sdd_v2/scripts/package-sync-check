@@ -5,12 +5,12 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[1]
 required_templates = [
-    'constitution.md','objective.md','tech-stack.md','tech-stack.yaml','architecture.md',
+    'constitution.md','objective.md','tech-stack.md','tech-stack.yaml','build.yaml','architecture.md',
     'engineering-rules.md','security.md','performance.md','quality-gates.md','release.md','traceability.yaml','mcp-registry.yaml'
 ]
 feature_templates = ['spec.md','clarify.md','checklist.md','plan.md','tasks.md','test-plan.md','execution.yaml','status.yaml']
 quality_templates=['definition-of-ready.md','definition-of-done.md','execution-rules.md','release-readiness.md']
-scripts=['sdd-bootstrap','sdd-feature-create','sdd-plan-change-check','sdd-execution-check','sdd-trace','sdd-validate','sdd-report','sdd-mcp-recommend']
+scripts=['sdd-bootstrap','sdd-feature-create','sdd-plan-change-check','sdd-execution-check','sdd-trace','sdd-validate','sdd-report','sdd-status','sdd-test','sdd-ci-gate','sdd-mcp-recommend']
 errors=[]
 for f in required_templates:
     if not (ROOT/'templates/project'/f).exists(): errors.append('missing template: '+f)
@@ -23,7 +23,7 @@ for f in scripts:
     if not p.exists(): errors.append('missing script: '+f)
     elif not (p.stat().st_mode & 0o111): errors.append('script not executable: '+f)
 text=(ROOT/'SKILL.md').read_text()
-for token in ['Plan Change Trigger','execution.yaml','traceability.yaml','mcp-registry.yaml','sdd-mcp-recommend','sdd-bootstrap','CONVERGED']:
+for token in ['Plan Change Trigger','execution.yaml','traceability.yaml','mcp-registry.yaml','sdd-mcp-recommend','sdd-bootstrap','CONVERGED','build.yaml','sdd-ci-gate']:
     if token not in text: errors.append(f'SKILL missing required concept: {token}')
 docs=(ROOT/'docs.html').read_text()
 for token in ['plan changes','execution.yaml','tech-stack.md','MCP recommendations','sdd-mcp-recommend']:

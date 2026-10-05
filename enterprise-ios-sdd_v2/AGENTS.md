@@ -19,3 +19,5 @@ Do not silently continue after a plan change. Ask whether the user wants:
 3. review/impact analysis only
 
 Use deterministic commands for evidence. Do not claim CI or test success without actual execution results.
+
+A feature is verified only when CI runs `make test` and `make ci-gate` and the gate reports it `CLEARED`: every test case in its `test-plan.md` names a real test (`Suite/testName`) that passed in that run. Set `ci_passed: true` only from such a run.

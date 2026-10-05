@@ -11,7 +11,7 @@ traceability:
 	@$(SCRIPTS)/sdd-trace
 
 execution-check:
-	@$(SCRIPTS)/sdd-execution-check
+	@$(SCRIPTS)/sdd-execution-check $(if $(FEATURE),--feature $(FEATURE),)
 
 validate:
 	@$(SCRIPTS)/sdd-validate
@@ -20,6 +20,20 @@ validate:
 
 report:
 	@$(SCRIPTS)/sdd-report
+
+status:
+	@$(SCRIPTS)/sdd-status
+
+status-check:
+	@$(SCRIPTS)/sdd-status --check
+
+test:
+	@$(SCRIPTS)/sdd-test
+
+ci-gate:
+	@$(SCRIPTS)/sdd-ci-gate
+
+ci: validate status-check test ci-gate
 
 package-sync-check:
 	@$(SCRIPTS)/package-sync-check

@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import os
+import re
+import sys
+from pathlib import Path
+
+FEATURES = Path('.sdd/features')
+CONFIG = Path('.sdd/project/build.yaml')
+CLAIMED_STATES = {'CONVERGED', 'RELEASE_READY', 'RELEASED'}
+
+
+def read(path: Path) -> str:
+    return path.read_text() if path.exists() else ''
+
+
+def normalize(test_id: str) -> str:
+    """Must match sdd-test: reduce any test identifier to Suite/test."""
+    name = re.sub(r'\([^)]*\)$', '', test_id.strip().strip('`'))
+    parts = [p for p in re.split(r'[./]', name) if p]
+    return '/'.join(parts[-2:])
+
+
+def output_dir() -> Path:
+    for line in read(CONFIG).splitlines():
+        line = line.split('#', 1)[0]
+        if line.strip().startswith('output:'):
+            value = line.split(':', 1)[1].strip().strip('"\'')
+            if value:
+                return Path(value)
+    return Path('build/sdd')
+
+
+def table(text: str, first_header: str):
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        cells = [c.strip() for c in line.strip().strip('|').split('|')]
+        if line.strip().startswith('|') and cells and cells[0] == first_header:
+            rows = []
+            for row in lines[i + 2:]:
+                if not row.strip().startswith('|'):
+                    break
+                rows.append(dict(zip(cells, [c.strip() for c in row.strip().strip('|').split('|')])))
+            return rows
+    return []
+
+
+def field(text: str, name: str) -> str:
+    m = re.search(rf'^{re.escape(name)}:\s*(.*)$', text, re.M)
+    return m.group(1).strip().strip('"') if m else ''
+
+
+def main():
+    ap = argparse.ArgumentParser(description='Clear a feature only when every test case in its test plan passed in this test run.')
+    ap.add_argument('--results', help='test-results.json written by sdd-test (default: <output>/test-results.json)')
+    args = ap.parse_args()
+
+    results_path = Path(args.results) if args.results else output_dir() / 'test-results.json'
+    if not results_path.exists():
+        print(f'{results_path} not found. Run `make test` (scripts/sdd-test) before the gate.', file=sys.stderr)
+        return 2
+    results = json.loads(results_path.read_text()).get('tests', {})
+
+    in_ci = os.environ.get('CI') == 'true' or os.environ.get('GITHUB_ACTIONS') == 'true'
+    print(f'SDD CI GATE ({"CI run" if in_ci else "local preview, not CI evidence"})')
+    print(f'Results: {results_path} ({len(results)} tests)\n')
+
+    blocked = 0
+    for root in sorted(FEATURES.glob('FTR-*')) if FEATURES.exists() else []:
+        status = field(read(root/'status.yaml'), 'status') or 'UNKNOWN'
+        rows = table(read(root/'test-plan.md'), 'Test ID')
+        verified_items = len(re.findall(r'^\s{4}status:\s*VERIFIED\b', read(root/'execution.yaml'), re.M))
+        claimed = status in CLAIMED_STATES or verified_items > 0 or any(r.get('Status', '').lower() == 'pass' for r in rows)
+
+        problems, passing = [], 0
+        if claimed and not rows:
+            problems.append('claims verification but test-plan.md has no test cases')
+        for row in rows:
+            tc, target = row.get('Test ID', '?'), row.get('Target Test', '').strip('` ')
+            if target in ('', 'TBD'):
+                if claimed:
+                    problems.append(f'{tc} has no target test')
+                continue
+            outcome = results.get(normalize(target))
+            if outcome == 'passed':
+                passing += 1
+                continue
+            reason = 'did not run' if outcome is None else outcome
+            if claimed or row.get('Status', '').lower() == 'pass':
+                problems.append(f'{tc} {target}: {reason}')
+
+        if problems:
+            blocked += 1
+            print(f'NOT CLEARED {root.name} ({status}): {passing} of {len(rows)} test cases passed')
+            for p in problems:
+                print(f'  - {p}')
+        elif claimed:
+            print(f'CLEARED     {root.name} ({status}): {passing} of {len(rows)} test cases passed')
+        else:
+            print(f'IN PROGRESS {root.name} ({status}): {passing} of {len(rows)} test cases passing; nothing claimed yet')
+
+    if blocked:
+        print(f'\nCI gate FAILED: {blocked} feature(s) claim verification without passing tests in this run.')
+        return 1
+    print('\nCI gate PASSED')
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

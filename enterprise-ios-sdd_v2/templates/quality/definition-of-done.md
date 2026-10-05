@@ -8,6 +8,6 @@
 - [ ] Architecture checks pass
 - [ ] Scope checks pass
 - [ ] Traceability complete
-- [ ] CI passes
+- [ ] CI passes, and `make ci-gate` reports the feature `CLEARED`
 - [ ] No blocking convergence findings
 - [ ] Required human approvals complete
