@@ -13,6 +13,8 @@ The repository is the source of truth. Coding agents are interchangeable executi
 
 Prefer **v2** for new work. It extends the original package with bootstrap, execution evidence, plan-change checks, package sync, MCP registry recommendations, and GitHub Actions workflows.
 
+For a full walkthrough of the lifecycle, repository layout, feature artifacts, traceability, MCP recommendations, and Tech Lead workflow, see **[GUIDE.md](GUIDE.md)**.
+
 ## Core workflow
 
 ```text
@@ -80,6 +82,12 @@ enterprise-ios-sdd_v2/
 4. `IMPLEMENTED` is not the same as `VERIFIED`.
 5. Do not invent product requirements or change architecture silently.
 6. Plan changes are lifecycle events — they must not be applied silently.
+
+## Documentation
+
+- [GUIDE.md](GUIDE.md) — detailed SDD framework guide
+- [enterprise-ios-sdd_v2/docs.html](enterprise-ios-sdd_v2/docs.html) — visual reference for files and workflow stages
+- [enterprise-ios-sdd_v2/SKILL.md](enterprise-ios-sdd_v2/SKILL.md) — agent skill contract
 
 ## References
 
