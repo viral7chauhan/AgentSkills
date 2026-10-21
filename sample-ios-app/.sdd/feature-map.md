@@ -4,7 +4,7 @@
 
 <!-- sdd-feature-map:start -->
 
-## Architecture (from project)
+### Architecture (from project)
 
 ```text
 # Architecture
@@ -33,7 +33,7 @@ Presentation (App/) → Domain (Sources/SubscriptionRestore/) → StoreKit adapt
 An exception to the StoreKit boundary requires an ADR. This sample's decision is `ADR-001`.
 ```
 
-## Layer map
+### Layer map
 
 ```mermaid
 flowchart TB
@@ -46,20 +46,20 @@ flowchart TB
   domain --- FTR_023
 ```
 
-## Feature dependency graph
+### Feature dependency graph
 
 ```mermaid
 flowchart LR
   FTR_023["FTR-023\nSubscription Restore\nCONVERGED"]
 ```
 
-## Feature correlation table
+### Feature correlation table
 
 | Feature | Status | Primary layer | Modules | Depends on | Related to | Provides | Consumes | Progress |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [FTR-023](features/FTR-023-subscription-restore/spec.md) Subscription Restore | `CONVERGED` | `domain` | `RestorePurchasesView`, `SubscriptionViewModel`, `SubscriptionRepository`, `EntitlementMapping`, `StoreKitRestoreAdapter` | — | — | subscription-access | — | req 4/4; plan 5/5 |
 
-## How to maintain this
+### How to maintain this
 
 1. Edit `.sdd/feature-map.yaml` when a feature is created or its relationships change.
 2. Record hard prerequisites in `depends_on`, soft links in `related_to`, shared code in `shares_modules_with`.

@@ -4,7 +4,7 @@
 
 <!-- sdd-progress:start -->
 
-## Summary
+### Summary
 
 | Metric | Count | Progress |
 | --- | ---: | --- |
@@ -14,13 +14,13 @@
 | Verified / converged | 1 | ██████████ 100% |
 | Release ready | 0 | ░░░░░░░░░░ 0% |
 
-## Feature board
+### Feature board
 
 | Feature | Spec ready | Spec → code | Verified | Tests | Status | CI | Blocking |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [FTR-023](features/FTR-023-subscription-restore/spec.md) FTR-023: Subscription Restore | Yes (`13/13` checklist) | ██████████ 100% | ██████████ 100% | ██████████ 100% | `CONVERGED` | `success` | — |
 
-## How to read this
+### How to read this
 
 - **Spec ready** — checklist complete and no `OPEN` items in `clarify.md`.
 - **Spec → code** — requirements (or plan items) marked implemented in `status.yaml` / `execution.yaml`.

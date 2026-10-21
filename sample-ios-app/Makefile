@@ -59,11 +59,17 @@ feature-map:
 feature-map-check:
 	@python3 $(SDD_SCRIPTS)/sdd-feature-map --check
 
-readme: status progress feature-map
+readme: status
 	@python3 $(SDD_SCRIPTS)/sdd-report --update-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-progress --update-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map --update-readme README.md
 
 readme-check:
 	@python3 $(SDD_SCRIPTS)/sdd-report --check-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-progress --check-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-progress --check
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map --check-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map --check
 
 plan-change:
 	@if [ -n "$(FEATURE)" ]; then \

@@ -146,11 +146,9 @@ def architecture_snippet() -> str:
     return '```text\n' + '\n'.join(lines) + '\n```\n'
 
 
-def render(data: dict) -> str:
+def enrich(data: dict) -> tuple[list, list]:
     layers = data.get('layers') or []
     features = data.get('features') or []
-
-    # Enrich with live status
     enriched = []
     for f in features:
         fid = str(f.get('id', ''))
@@ -165,15 +163,22 @@ def render(data: dict) -> str:
             if not isinstance(val, list):
                 row[key] = [val] if val else []
         enriched.append(row)
+    return layers, enriched
 
-    lines = [
-        '## Architecture (from project)',
-        '',
-        architecture_snippet().rstrip(),
-        '',
-        '## Layer map',
-        '',
-    ]
+
+def render(data: dict, *, link_prefix: str = 'features/', include_architecture: bool = True, guide: bool = True) -> str:
+    layers, enriched = enrich(data)
+    lines = []
+
+    if include_architecture:
+        lines += [
+            '### Architecture (from project)',
+            '',
+            architecture_snippet().rstrip(),
+            '',
+        ]
+
+    lines += ['### Layer map', '']
 
     if layers:
         lines += ['```mermaid', 'flowchart TB']
@@ -185,7 +190,6 @@ def render(data: dict) -> str:
             a = mermaid_id(str(layers[i].get('id', layers[i].get('name'))))
             b = mermaid_id(str(layers[i + 1].get('id', layers[i + 1].get('name'))))
             lines.append(f'  {a} --> {b}')
-        # Attach features to primary_layer
         for f in enriched:
             fid = mermaid_id(str(f.get('id', 'FTR')))
             layer = mermaid_id(str(f.get('primary_layer', 'domain')))
@@ -197,7 +201,7 @@ def render(data: dict) -> str:
     else:
         lines += ['_No layers defined in `feature-map.yaml`._', '']
 
-    lines += ['## Feature dependency graph', '']
+    lines += ['### Feature dependency graph', '']
     if enriched:
         lines += ['```mermaid', 'flowchart LR']
         for f in enriched:
@@ -211,7 +215,6 @@ def render(data: dict) -> str:
                 lines.append(f'  {fid} -. related .- {mermaid_id(str(rel))}')
             for share in f.get('shares_modules_with') or []:
                 lines.append(f'  {fid} -. shares modules .- {mermaid_id(str(share))}')
-        # capability edges
         providers = {}
         for f in enriched:
             for cap in f.get('provides') or []:
@@ -232,7 +235,7 @@ def render(data: dict) -> str:
         ]
 
     lines += [
-        '## Feature correlation table',
+        '### Feature correlation table',
         '',
         '| Feature | Status | Primary layer | Modules | Depends on | Related to | Provides | Consumes | Progress |',
         '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
@@ -241,7 +244,7 @@ def render(data: dict) -> str:
         lines.append('| — | — | — | — | — | — | — | — | — |')
     else:
         for f in enriched:
-            link = f"[{f.get('id')}](features/{f.get('folder')}/spec.md)" if f.get('folder') else f.get('id')
+            link = f"[{f.get('id')}]({link_prefix}{f.get('folder')}/spec.md)" if f.get('folder') else f.get('id')
             lines.append(
                 f"| {link} {f.get('name', '')} "
                 f"| `{f.get('live_status')}` "
@@ -254,34 +257,58 @@ def render(data: dict) -> str:
                 f"| req {f.get('req')}; plan {f.get('plan')} |"
             )
 
-    lines += [
-        '',
-        '## How to maintain this',
-        '',
-        '1. Edit `.sdd/feature-map.yaml` when a feature is created or its relationships change.',
-        '2. Record hard prerequisites in `depends_on`, soft links in `related_to`, shared code in `shares_modules_with`.',
-        '3. Use `provides` / `consumes` for capability contracts between features.',
-        '4. Run `make feature-map` (and commit the regenerated `.sdd/feature-map.md`).',
-        '',
-    ]
+    if guide:
+        lines += [
+            '',
+            '### How to maintain this',
+            '',
+            '1. Edit `.sdd/feature-map.yaml` when a feature is created or its relationships change.',
+            '2. Record hard prerequisites in `depends_on`, soft links in `related_to`, shared code in `shares_modules_with`.',
+            '3. Use `provides` / `consumes` for capability contracts between features.',
+            '4. Run `make feature-map` (and commit the regenerated `.sdd/feature-map.md`).',
+            '',
+        ]
+    else:
+        lines.append('')
     return '\n'.join(lines)
 
 
 def with_body(doc: str, body: str) -> str:
     start, end = doc.find(START), doc.find(END)
     if start == -1 or end == -1 or end < start:
-        return (
+        raise ValueError(f'document needs {START} and {END} markers')
+    return doc[: start + len(START)] + '\n\n' + body.rstrip() + '\n\n' + doc[end:]
+
+
+def write_map(body: str) -> None:
+    current = read(MAP_MD) if MAP_MD.exists() else (
+        '# Project Feature Map\n\n'
+        '> Generated by `scripts/sdd-feature-map` from `.sdd/feature-map.yaml`.\n\n'
+        f'{START}\n\n_No features yet._\n\n{END}\n'
+    )
+    try:
+        expected = with_body(current, body)
+    except ValueError:
+        expected = (
             '# Project Feature Map\n\n'
             '> Generated by `scripts/sdd-feature-map` from `.sdd/feature-map.yaml`.\n\n'
             f'{START}\n\n{body.rstrip()}\n\n{END}\n'
         )
-    return doc[: start + len(START)] + '\n\n' + body.rstrip() + '\n\n' + doc[end:]
+    MAP_MD.parent.mkdir(parents=True, exist_ok=True)
+    if not MAP_MD.exists() or read(MAP_MD) != expected:
+        MAP_MD.write_text(expected)
+        print(f'Updated {MAP_MD}')
+    else:
+        print(f'{MAP_MD} is already current')
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description='Generate .sdd/feature-map.md from feature-map.yaml.')
-    ap.add_argument('--check', action='store_true', help='fail if feature-map.md is stale')
-    ap.add_argument('--stdout', action='store_true', help='print without writing')
+    mode = ap.add_mutually_exclusive_group()
+    mode.add_argument('--check', action='store_true', help='fail if feature-map.md is stale')
+    mode.add_argument('--stdout', action='store_true', help='print without writing')
+    mode.add_argument('--update-readme', metavar='PATH', help='rewrite the feature-map section inside PATH')
+    mode.add_argument('--check-readme', metavar='PATH', help='fail if the feature-map section inside PATH is stale')
     args = ap.parse_args()
 
     if not MAP_YAML.exists():
@@ -295,8 +322,46 @@ def main() -> int:
         print(body)
         return 0
 
-    current = read(MAP_MD) if MAP_MD.exists() else ''
-    expected = with_body(current, body)
+    readme_path = args.update_readme or args.check_readme
+    if readme_path:
+        path = Path(readme_path)
+        readme_body = render(
+            data,
+            link_prefix='.sdd/features/',
+            include_architecture=False,
+            guide=False,
+        )
+        current = read(path)
+        try:
+            expected = with_body(current, readme_body)
+        except ValueError as error:
+            print(f'{path}: {error}', file=sys.stderr)
+            return 2
+        if args.update_readme:
+            if expected != current:
+                path.write_text(expected)
+                print(f'Updated feature-map section in {path}')
+            else:
+                print(f'Feature-map section in {path} is already current')
+            write_map(body)
+            return 0
+        if expected != current:
+            print(f'{path}: feature-map section is out of date. Run `make readme` and commit the result.', file=sys.stderr)
+            return 1
+        print(f'Feature-map section in {path} matches feature-map.yaml and status')
+        return 0
+
+    try:
+        expected = with_body(
+            read(MAP_MD) if MAP_MD.exists() else f'# Project Feature Map\n\n{START}\n\n_\n\n{END}\n',
+            body,
+        )
+    except ValueError:
+        expected = (
+            '# Project Feature Map\n\n'
+            '> Generated by `scripts/sdd-feature-map` from `.sdd/feature-map.yaml`.\n\n'
+            f'{START}\n\n{body.rstrip()}\n\n{END}\n'
+        )
 
     if args.check:
         if not MAP_MD.exists() or read(MAP_MD) != expected:
@@ -305,12 +370,7 @@ def main() -> int:
         print(f'{MAP_MD} matches feature-map.yaml and feature status')
         return 0
 
-    MAP_MD.parent.mkdir(parents=True, exist_ok=True)
-    if not MAP_MD.exists() or read(MAP_MD) != expected:
-        MAP_MD.write_text(expected)
-        print(f'Updated {MAP_MD}')
-    else:
-        print(f'{MAP_MD} is already current')
+    write_map(body)
     return 0
 
 
