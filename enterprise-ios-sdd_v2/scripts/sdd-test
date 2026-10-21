@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import re
+import shutil
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+CONFIG = Path('.sdd/project/build.yaml')
+SYSTEMS = {'spm', 'xcodeproj', 'xcworkspace'}
+SIMULATOR_RUNTIME = {
+    'iOS Simulator': 'iOS',
+    'tvOS Simulator': 'tvOS',
+    'visionOS Simulator': 'xrOS',
+    'watchOS Simulator': 'watchOS',
+}
+RANK = {'passed': 0, 'skipped': 1, 'failed': 2}
+
+
+def load_config(path: Path):
+    if not path.exists():
+        sys.exit(f'{path} not found. Copy templates/project/build.yaml and fill it in.')
+    config = {}
+    for line in path.read_text().splitlines():
+        line = line.split('#', 1)[0].rstrip()
+        if ':' in line:
+            key, value = line.split(':', 1)
+            config[key.strip()] = value.strip().strip('"\'')
+    missing = [k for k in ('system', 'path') if config.get(k, 'TBD') in ('', 'TBD')]
+    if config.get('system') in ('xcodeproj', 'xcworkspace') and config.get('scheme', 'TBD') in ('', 'TBD'):
+        missing.append('scheme')
+    if missing:
+        sys.exit(f'{path}: fill in {", ".join(missing)} before running tests.')
+    if config['system'] not in SYSTEMS:
+        sys.exit(f'{path}: system must be one of {", ".join(sorted(SYSTEMS))}.')
+    return config
+
+
+def normalize(test_id: str) -> str:
+    """Reduce any test identifier to Suite/test so Xcode, SwiftPM, and test-plan.md names compare equal."""
+    name = re.sub(r'\([^)]*\)$', '', test_id.strip().strip('`'))
+    parts = [p for p in re.split(r'[./]', name) if p]
+    return '/'.join(parts[-2:])
+
+
+def record(results, test_id, outcome):
+    key = normalize(test_id)
+    if key not in results or RANK[outcome] > RANK[results[key]]:
+        results[key] = outcome
+
+
+def simulator_destination(platform: str, device: str) -> str:
+    runtime_word = SIMULATOR_RUNTIME.get(platform)
+    if not runtime_word:
+        sys.exit(f'Unsupported platform "{platform}". Use macOS or one of: {", ".join(SIMULATOR_RUNTIME)}.')
+    raw = subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '-j'])
+    for runtime, devices in json.loads(raw).get('devices', {}).items():
+        if runtime_word not in runtime:
+            continue
+        for d in devices:
+            if d.get('isAvailable') and d.get('name', '').startswith(device):
+                print(f'Destination: {d["name"]} ({runtime.rsplit(".", 1)[-1]})')
+                return f'platform={platform},id={d["udid"]}'
+    sys.exit(f'No available {platform} device whose name starts with "{device}". '
+             f'Install a runtime (xcodebuild -downloadPlatform {runtime_word.replace("xrOS", "visionOS")}) or change device.')
+
+
+def run_spm(config, out: Path, results):
+    xunit = out / 'xunit.xml'
+    cmd = ['swift', 'test', '--package-path', config['path'], '--xunit-output', str(xunit)]
+    print('$ ' + ' '.join(cmd), flush=True)
+    code = subprocess.call(cmd)
+    for report in [xunit, out / 'xunit-swift-testing.xml']:
+        if not report.exists():
+            continue
+        for case in ET.parse(report).getroot().iter('testcase'):
+            test_id = f'{case.get("classname", "")}/{case.get("name", "")}'
+            if case.find('failure') is not None or case.find('error') is not None:
+                record(results, test_id, 'failed')
+            elif case.find('skipped') is not None:
+                record(results, test_id, 'skipped')
+            else:
+                record(results, test_id, 'passed')
+    return cmd, code
+
+
+def run_xcode(config, out: Path, results):
+    platform = config.get('platform') or 'iOS Simulator'
+    destination = 'platform=macOS' if platform == 'macOS' else simulator_destination(platform, config.get('device') or 'iPhone')
+    bundle = out / 'Tests.xcresult'
+    if bundle.exists():
+        shutil.rmtree(bundle)
+    flag = '-project' if config['system'] == 'xcodeproj' else '-workspace'
+    cmd = ['xcodebuild', flag, config['path'], '-scheme', config['scheme'],
+           '-destination', destination,
+           '-configuration', config.get('configuration') or 'Debug',
+           '-derivedDataPath', str(out / 'DerivedData'),
+           '-resultBundlePath', str(bundle)]
+    if config.get('test_plan'):
+        cmd += ['-testPlan', config['test_plan']]
+    cmd += ['CODE_SIGNING_ALLOWED=NO', 'test']
+    print('$ ' + ' '.join(cmd), flush=True)
+    code = subprocess.call(cmd)
+    if not bundle.exists():
+        return cmd, code
+    parsed = subprocess.run(['xcrun', 'xcresulttool', 'get', 'test-results', 'tests', '--path', str(bundle), '--format', 'json'],
+                            capture_output=True, text=True)
+    if parsed.returncode != 0:
+        sys.exit(f'xcresulttool could not read {bundle} (Xcode 16 or later is required):\n{parsed.stderr}')
+
+    def walk(nodes):
+        for node in nodes:
+            if node.get('nodeType') == 'Test Case':
+                outcome = (node.get('result') or '').lower()
+                outcome = 'passed' if outcome in ('passed', 'expected failure') else 'skipped' if outcome == 'skipped' else 'failed'
+                record(results, node.get('nodeIdentifier') or node.get('name', ''), outcome)
+            walk(node.get('children', []))
+    walk(json.loads(parsed.stdout).get('testNodes', []))
+    return cmd, code
+
+
+def main():
+    ap = argparse.ArgumentParser(description='Run the project tests described in .sdd/project/build.yaml and record per-test results.')
+    ap.add_argument('--config', default=str(CONFIG))
+    args = ap.parse_args()
+
+    config = load_config(Path(args.config))
+    out = Path(config.get('output') or 'build/sdd')
+    out.mkdir(parents=True, exist_ok=True)
+
+    results = {}
+    runner = run_spm if config['system'] == 'spm' else run_xcode
+    cmd, code = runner(config, out, results)
+
+    summary = {k: sum(1 for v in results.values() if v == k) for k in RANK}
+    (out / 'test-results.json').write_text(json.dumps({
+        'system': config['system'], 'command': cmd, 'exit_code': code,
+        'summary': summary, 'tests': dict(sorted(results.items())),
+    }, indent=2) + '\n')
+    print(f'\nTests: {summary["passed"]} passed, {summary["failed"]} failed, {summary["skipped"]} skipped. '
+          f'Results: {out / "test-results.json"}')
+
+    if not results:
+        print('No test results were recorded.', file=sys.stderr)
+        return code or 1
+    return code if code else (1 if summary['failed'] else 0)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

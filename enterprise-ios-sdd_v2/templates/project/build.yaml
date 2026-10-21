@@ -1,0 +1,16 @@
+# How `make test` and CI build and run this project's tests. Fill in once per project.
+# system: spm | xcodeproj | xcworkspace
+system: TBD
+# Package directory for spm, or the path to the .xcodeproj / .xcworkspace.
+path: TBD
+# Shared scheme to test. Required for xcodeproj and xcworkspace.
+scheme: TBD
+# iOS Simulator | tvOS Simulator | visionOS Simulator | watchOS Simulator | macOS
+platform: iOS Simulator
+# Simulator name prefix used to pick a device, for example "iPhone", "iPad", or "Apple TV".
+device: iPhone
+# Optional test plan name. Leave empty to use the scheme's default.
+test_plan:
+configuration: Debug
+# Results and DerivedData go here. Keep it out of version control.
+output: build/sdd

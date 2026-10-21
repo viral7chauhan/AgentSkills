@@ -26,11 +26,21 @@ def main():
         ROOT/'templates/project/constitution.md': Path('.sdd/constitution.md'),
     }
     for src in (ROOT/'templates/project').glob('*'):
-        if src.name == 'mcp-registry.yaml' or src.name == 'traceability.yaml':
+        if src.name in (
+            'constitution.md',
+            'mcp-registry.yaml',
+            'traceability.yaml',
+            'progress.md',
+            'feature-map.md',
+            'feature-map.yaml',
+        ):
             continue
         mapping[src]=Path('.sdd/project')/src.name
     mapping[ROOT/'templates/project/mcp-registry.yaml'] = Path('.sdd/mcp-registry.yaml')
     mapping[ROOT/'templates/project/traceability.yaml'] = Path('.sdd/traceability.yaml')
+    mapping[ROOT/'templates/project/progress.md'] = Path('.sdd/progress.md')
+    mapping[ROOT/'templates/project/feature-map.md'] = Path('.sdd/feature-map.md')
+    mapping[ROOT/'templates/project/feature-map.yaml'] = Path('.sdd/feature-map.yaml')
     for src in ROOT.joinpath('templates/quality').glob('*'):
         mapping[src]=Path('.sdd/quality')/src.name
 

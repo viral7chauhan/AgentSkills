@@ -22,4 +22,4 @@ Flag:
 - missing CI evidence
 - security/privacy concerns
 
-Do not declare `CONVERGED` when a blocking finding remains.
+Do not declare `CONVERGED` when a blocking finding remains, or when the last CI run's `make ci-gate` did not report the feature `CLEARED`.

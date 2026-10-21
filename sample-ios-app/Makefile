@@ -1,0 +1,81 @@
+SDD_SCRIPTS := ../enterprise-ios-sdd_v2/scripts
+FEATURE ?=
+
+.PHONY: test unit-test ci-gate ci build spec-check traceability execution-check validate report status status-check progress progress-check feature-map feature-map-check readme readme-check plan-change
+
+test:
+	@python3 $(SDD_SCRIPTS)/sdd-test
+
+unit-test:
+	swift test
+
+ci-gate:
+	@python3 $(SDD_SCRIPTS)/sdd-ci-gate
+
+ci: validate status-check progress-check feature-map-check readme-check test ci-gate
+
+build:
+	xcodebuild \
+		-project SubscriptionRestore.xcodeproj \
+		-scheme SubscriptionRestore \
+		-destination 'generic/platform=iOS Simulator' \
+		-quiet \
+		CODE_SIGNING_ALLOWED=NO \
+		build
+
+spec-check:
+	@python3 $(SDD_SCRIPTS)/sdd-validate --spec-only
+
+traceability:
+	@python3 $(SDD_SCRIPTS)/sdd-trace
+
+execution-check:
+	@python3 $(SDD_SCRIPTS)/sdd-execution-check $(if $(FEATURE),--feature $(FEATURE),)
+
+validate:
+	@python3 $(SDD_SCRIPTS)/sdd-validate
+	@python3 $(SDD_SCRIPTS)/sdd-trace
+	@python3 $(SDD_SCRIPTS)/sdd-execution-check
+
+report:
+	@python3 $(SDD_SCRIPTS)/sdd-report
+
+status:
+	@python3 $(SDD_SCRIPTS)/sdd-status
+
+status-check:
+	@python3 $(SDD_SCRIPTS)/sdd-status --check
+
+progress:
+	@python3 $(SDD_SCRIPTS)/sdd-status
+	@python3 $(SDD_SCRIPTS)/sdd-progress
+
+progress-check:
+	@python3 $(SDD_SCRIPTS)/sdd-progress --check
+
+feature-map:
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map
+
+feature-map-check:
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map --check
+
+readme: status
+	@python3 $(SDD_SCRIPTS)/sdd-report --update-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-progress --update-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map --update-readme README.md
+
+readme-check:
+	@python3 $(SDD_SCRIPTS)/sdd-report --check-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-progress --check-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-progress --check
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map --check-readme README.md
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map --check
+
+plan-change:
+	@if [ -n "$(FEATURE)" ]; then \
+		python3 $(SDD_SCRIPTS)/sdd-plan-change-check --feature $(FEATURE); \
+	else \
+		for dir in .sdd/features/FTR-*; do \
+			python3 $(SDD_SCRIPTS)/sdd-plan-change-check --feature $$(basename $$dir | cut -d- -f1-2) || exit 1; \
+		done; \
+	fi

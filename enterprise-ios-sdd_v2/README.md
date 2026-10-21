@@ -89,8 +89,18 @@ make spec-check
 make traceability
 make execution-check
 make validate
+make status          # regenerate status counts and traceability
+make progress        # .sdd/progress.md — spec ready vs implemented board
+make feature-map     # .sdd/feature-map.md — architecture + feature Mermaid diagrams
+make test            # build and test as declared in .sdd/project/build.yaml
+make ci-gate         # clear features only if all their test cases passed in that run
+make ci              # validate, status-check, progress-check, feature-map-check, test, ci-gate
 make report
 ```
+
+Edit `.sdd/feature-map.yaml` to record feature relationships (`depends_on`, `related_to`, shared modules, `provides`/`consumes`), then run `make feature-map`.
+
+Each project declares its own build in `.sdd/project/build.yaml` (`spm`, `xcodeproj`, or `xcworkspace`; scheme; iOS, tvOS, visionOS, watchOS simulator or macOS), so the same scripts work for any iOS project type.
 
 ## MCP recommendation
 

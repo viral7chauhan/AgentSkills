@@ -24,6 +24,7 @@ if [[ ! "$FEATURE_ID" =~ ^FTR-[0-9]{3,}$ ]]; then
   exit 2
 fi
 
+FEATURE_NUM="${FEATURE_ID#FTR-}"
 slug=$(printf '%s' "$FEATURE_NAME" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
 root=".sdd/features/${FEATURE_ID}-${slug}"
 
@@ -42,7 +43,7 @@ for f in spec.md clarify.md checklist.md plan.md tasks.md test-plan.md execution
     echo "Missing template: $template" >&2
     exit 1
   fi
-  sed -e "s/FTR-###/${FEATURE_ID}/g" "$template" > "$root/$f"
+  sed -e "s/FTR-###/${FEATURE_ID}/g" -e "s/-###-/-${FEATURE_NUM}-/g" "$template" > "$root/$f"
 done
 
 # Replace a few display placeholders.
@@ -66,3 +67,50 @@ for path in (status, execution):
 PY
 
 echo "Created $root"
+
+# Register the feature in the project feature map when present.
+map_yaml=".sdd/feature-map.yaml"
+if [[ -f "$map_yaml" ]] && ! grep -qE "^[[:space:]]*- id: ${FEATURE_ID}$" "$map_yaml" 2>/dev/null; then
+  python3 - <<PY
+from pathlib import Path
+import re
+path = Path("$map_yaml")
+text = path.read_text()
+folder = Path("$root").name
+stub = f"""
+  - id: {FEATURE_ID}
+    name: {FEATURE_NAME}
+    folder: {folder}
+    primary_layer: domain
+    modules: []
+    depends_on: []
+    related_to: []
+    shares_modules_with: []
+    provides: []
+    consumes: []
+"""
+if re.search(r"^features:\s*\[\]\s*$", text, re.M):
+    text = re.sub(r"^features:\s*\[\]\s*$", "features:" + stub, text, count=1, flags=re.M)
+elif re.search(r"^features:\s*$", text, re.M):
+    text = text.rstrip() + "\n" + stub + "\n"
+else:
+    text = text.rstrip() + "\n\nfeatures:" + stub + "\n"
+path.write_text(text)
+print(f"Registered {FEATURE_ID} in {path}")
+PY
+fi
+
+status_script="$(dirname "$0")/sdd-status"
+if [[ -x "$status_script" ]]; then
+  "$status_script"
+fi
+
+progress_script="$(dirname "$0")/sdd-progress"
+if [[ -x "$progress_script" ]]; then
+  "$progress_script"
+fi
+
+map_script="$(dirname "$0")/sdd-feature-map"
+if [[ -x "$map_script" ]] && [[ -f "$map_yaml" ]]; then
+  "$map_script"
+fi

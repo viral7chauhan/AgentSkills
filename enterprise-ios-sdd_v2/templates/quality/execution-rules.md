@@ -6,3 +6,4 @@
 4. Plan changes require `implement`, `validate`, or `review` intent.
 5. CI results must be real execution evidence.
 6. Scope expansion must be explicit.
+7. A feature is verified only when `make ci-gate` reports it `CLEARED` in CI: every test case's target test passed in that run.

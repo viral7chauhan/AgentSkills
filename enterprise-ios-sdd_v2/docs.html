@@ -89,6 +89,9 @@ Merge / Release</pre></section>
 │       └── status.yaml
 ├── adr/
 ├── traceability.yaml
+├── progress.md
+├── feature-map.yaml
+├── feature-map.md
 ├── mcp-registry.yaml
 └── quality/
     ├── definition-of-ready.md
@@ -114,6 +117,9 @@ Makefile
 <tr><td><code>performance.md</code></td><td>What are the performance expectations?</td><td>Startup, memory, scrolling, network, media budgets.</td></tr>
 <tr><td><code>quality-gates.md</code></td><td>What must pass before merge?</td><td>Build, tests, lint, architecture, traceability, security.</td></tr>
 <tr><td><code>release.md</code></td><td>How does work reach users?</td><td>Branches/tags, release gates, rollout and rollback.</td></tr>
+<tr><td><code>progress.md</code></td><td>Is each feature's spec ready and implemented?</td><td>Generated board: spec ready, spec→code, verified, tests, CI.</td></tr>
+<tr><td><code>feature-map.yaml</code></td><td>How do features relate?</td><td>Layers, modules, depends_on, related_to, provides/consumes.</td></tr>
+<tr><td><code>feature-map.md</code></td><td>Visual architecture + feature correlation</td><td>Generated Mermaid layer and dependency diagrams.</td></tr>
 <tr><td><code>adr/</code></td><td>Why did we make a major architectural decision?</td><td>Context, decision, alternatives, consequences, status.</td></tr></table></section>
 
 <section><h2>5. Feature files</h2><table><tr><th>File</th><th>Purpose</th><th>What to write</th></tr>
@@ -161,13 +167,19 @@ Exceptional: BLOCKED | CANCELLED | SUPERSEDED</pre>
 ./scripts/sdd-trace
 ./scripts/sdd-validate
 ./scripts/sdd-report
+./scripts/sdd-status
+./scripts/sdd-test
+./scripts/sdd-ci-gate
 ./scripts/sdd-mcp-recommend --feature FTR-023
 
 make bootstrap
 make validate
+make test
+make ci-gate
 make report
 make mcp-recommend FEATURE=FTR-023
-</pre></section>
+</pre>
+<p><code>.sdd/project/build.yaml</code> declares how each project builds and tests (SwiftPM, Xcode project, or workspace; scheme; simulator platform). <code>sdd-test</code> runs it and records every test result; <code>sdd-ci-gate</code> clears a feature only when every test case in its test plan passed in that CI run.</p></section>
 
 <section><h2>11. MCP recommendations</h2>
 <p>MCP should supply external context/actions; deterministic scripts and CI should remain responsible for build/test/quality truth.</p>

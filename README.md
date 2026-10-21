@@ -9,11 +9,17 @@ The repository is the source of truth. Coding agents are interchangeable executi
 | Package | Status | Description |
 | --- | --- | --- |
 | [`enterprise-ios-sdd_v2/`](enterprise-ios-sdd_v2/) | **Recommended** | Full SDD skill: project bootstrap, feature lifecycle, plan-change handling, MCP recommendations, validation scripts, and CI workflows |
-| [`enterprise-ios-sdd/`](enterprise-ios-sdd/) | Earlier package | Core SDD skill, feature scaffolding, templates, and docs |
+| [`enterprise-ios-sdd/`](enterprise-ios-sdd/) | Archived | v1 of the skill, renamed `enterprise-ios-sdd-v1` so it no longer competes with v2 |
+| [`spec-driven-development/`](spec-driven-development/) | Separate skill | Lighter roadmap-driven SDD for repos that keep specs in `specs/` |
 
 Prefer **v2** for new work. It extends the original package with bootstrap, execution evidence, plan-change checks, package sync, MCP registry recommendations, and GitHub Actions workflows.
 
 For a full walkthrough of the lifecycle, repository layout, feature artifacts, traceability, MCP recommendations, and Tech Lead workflow, see **[GUIDE.md](GUIDE.md)**.
+
+Project-level views (v2):
+
+- `.sdd/progress.md` — **spec ready vs implemented** board across all features (`make progress`)
+- `.sdd/feature-map.md` — **architecture + feature correlation** Mermaid diagrams (`make feature-map`, edit `.sdd/feature-map.yaml`)
 
 ## Core workflow
 

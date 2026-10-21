@@ -1,0 +1,41 @@
+platform:
+  ios: true
+  tvos: false
+  min_ios: "17.0"
+  min_tvos: null
+language:
+  swift: "5.9"
+  xcode: "16"
+ui:
+  primary: SwiftUI
+  additional: []
+architecture:
+  style: presentation-domain-adapter
+  dependency_injection: constructor
+concurrency:
+  preferred: [async-await]
+networking:
+  client: StoreKit
+  protocol: StoreKit2
+persistence:
+  local: []
+  secure: []
+dependencies:
+  manager: Swift Package Manager
+  approved: []
+  prohibited: []
+testing:
+  unit: Swift Testing
+  integration: none
+  ui: none
+quality:
+  lint: none
+  format: none
+  coverage_minimum: null
+ci:
+  provider: GitHub Actions
+observability:
+  crash: none
+  analytics: local-state-only
+feature_flags: none
+media: {}

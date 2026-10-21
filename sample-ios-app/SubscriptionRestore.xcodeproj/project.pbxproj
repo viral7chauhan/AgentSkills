@@ -1,0 +1,446 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B10000000000000000000001 /* SubscriptionRestoreApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* SubscriptionRestoreApp.swift */; };
+		B10000000000000000000002 /* RestorePurchasesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* RestorePurchasesView.swift */; };
+		B10000000000000000000003 /* StoreKitRestoreAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* StoreKitRestoreAdapter.swift */; };
+		B10000000000000000000004 /* SubscriptionAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004 /* SubscriptionAccess.swift */; };
+		B10000000000000000000005 /* SubscriptionRestoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000005 /* SubscriptionRestoring.swift */; };
+		B10000000000000000000006 /* EntitlementMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000006 /* EntitlementMapping.swift */; };
+		B10000000000000000000007 /* SubscriptionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000007 /* SubscriptionRepository.swift */; };
+		B10000000000000000000008 /* SubscriptionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000008 /* SubscriptionViewModel.swift */; };
+		B10000000000000000000009 /* EntitlementMappingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000009 /* EntitlementMappingTests.swift */; };
+		B1000000000000000000000A /* SubscriptionRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000A /* SubscriptionRepositoryTests.swift */; };
+		B1000000000000000000000B /* SubscriptionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000B /* SubscriptionViewModelTests.swift */; };
+		B1000000000000000000000C /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000C /* StoreKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F10000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = T10000000000000000000001;
+			remoteInfo = SubscriptionRestore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A10000000000000000000001 /* SubscriptionRestoreApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRestoreApp.swift; sourceTree = "<group>"; };
+		A10000000000000000000002 /* RestorePurchasesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestorePurchasesView.swift; sourceTree = "<group>"; };
+		A10000000000000000000003 /* StoreKitRestoreAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitRestoreAdapter.swift; sourceTree = "<group>"; };
+		A10000000000000000000004 /* SubscriptionAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionAccess.swift; sourceTree = "<group>"; };
+		A10000000000000000000005 /* SubscriptionRestoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRestoring.swift; sourceTree = "<group>"; };
+		A10000000000000000000006 /* EntitlementMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementMapping.swift; sourceTree = "<group>"; };
+		A10000000000000000000007 /* SubscriptionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRepository.swift; sourceTree = "<group>"; };
+		A10000000000000000000008 /* SubscriptionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionViewModel.swift; sourceTree = "<group>"; };
+		A10000000000000000000009 /* EntitlementMappingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementMappingTests.swift; sourceTree = "<group>"; };
+		A1000000000000000000000A /* SubscriptionRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRepositoryTests.swift; sourceTree = "<group>"; };
+		A1000000000000000000000B /* SubscriptionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionViewModelTests.swift; sourceTree = "<group>"; };
+		A1000000000000000000000C /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		P10000000000000000000001 /* SubscriptionRestore.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SubscriptionRestore.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		P10000000000000000000002 /* SubscriptionRestoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SubscriptionRestoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		H10000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1000000000000000000000C /* StoreKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		H10000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		G10000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				G10000000000000000000002 /* App */,
+				G10000000000000000000003 /* Sources */,
+				G10000000000000000000005 /* Tests */,
+				G10000000000000000000008 /* Frameworks */,
+				G10000000000000000000007 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		G10000000000000000000002 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000001 /* SubscriptionRestoreApp.swift */,
+				A10000000000000000000002 /* RestorePurchasesView.swift */,
+				A10000000000000000000003 /* StoreKitRestoreAdapter.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000003 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				G10000000000000000000004 /* SubscriptionRestore */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000004 /* SubscriptionRestore */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000004 /* SubscriptionAccess.swift */,
+				A10000000000000000000006 /* EntitlementMapping.swift */,
+				A10000000000000000000007 /* SubscriptionRepository.swift */,
+				A10000000000000000000005 /* SubscriptionRestoring.swift */,
+				A10000000000000000000008 /* SubscriptionViewModel.swift */,
+			);
+			path = SubscriptionRestore;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000005 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				G10000000000000000000006 /* SubscriptionRestoreTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000006 /* SubscriptionRestoreTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000009 /* EntitlementMappingTests.swift */,
+				A1000000000000000000000A /* SubscriptionRepositoryTests.swift */,
+				A1000000000000000000000B /* SubscriptionViewModelTests.swift */,
+			);
+			path = SubscriptionRestoreTests;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000007 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				P10000000000000000000001 /* SubscriptionRestore.app */,
+				P10000000000000000000002 /* SubscriptionRestoreTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000008 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A1000000000000000000000C /* StoreKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		T10000000000000000000001 /* SubscriptionRestore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C20000000000000000000001 /* Build configuration list for PBXNativeTarget "SubscriptionRestore" */;
+			buildPhases = (
+				H10000000000000000000001 /* Sources */,
+				H10000000000000000000002 /* Frameworks */,
+				H10000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SubscriptionRestore;
+			productName = SubscriptionRestore;
+			productReference = P10000000000000000000001 /* SubscriptionRestore.app */;
+			productType = "com.apple.product-type.application";
+		};
+		T10000000000000000000002 /* SubscriptionRestoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C30000000000000000000001 /* Build configuration list for PBXNativeTarget "SubscriptionRestoreTests" */;
+			buildPhases = (
+				H10000000000000000000004 /* Sources */,
+				H10000000000000000000005 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F10000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = SubscriptionRestoreTests;
+			productName = SubscriptionRestoreTests;
+			productReference = P10000000000000000000002 /* SubscriptionRestoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E10000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				ORGANIZATIONNAME = Sample;
+				TargetAttributes = {
+					T10000000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					T10000000000000000000002 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = T10000000000000000000001;
+					};
+				};
+			};
+			buildConfigurationList = C10000000000000000000001 /* Build configuration list for PBXProject "SubscriptionRestore" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = G10000000000000000000001;
+			productRefGroup = G10000000000000000000007 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				T10000000000000000000001 /* SubscriptionRestore */,
+				T10000000000000000000002 /* SubscriptionRestoreTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		H10000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		H10000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B10000000000000000000001 /* SubscriptionRestoreApp.swift in Sources */,
+				B10000000000000000000002 /* RestorePurchasesView.swift in Sources */,
+				B10000000000000000000003 /* StoreKitRestoreAdapter.swift in Sources */,
+				B10000000000000000000004 /* SubscriptionAccess.swift in Sources */,
+				B10000000000000000000005 /* SubscriptionRestoring.swift in Sources */,
+				B10000000000000000000006 /* EntitlementMapping.swift in Sources */,
+				B10000000000000000000007 /* SubscriptionRepository.swift in Sources */,
+				B10000000000000000000008 /* SubscriptionViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		H10000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B10000000000000000000009 /* EntitlementMappingTests.swift in Sources */,
+				B1000000000000000000000A /* SubscriptionRepositoryTests.swift in Sources */,
+				B1000000000000000000000B /* SubscriptionViewModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F10000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = T10000000000000000000001 /* SubscriptionRestore */;
+			targetProxy = F10000000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D10000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D10000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D20000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Subscription Restore";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.SubscriptionRestore;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D20000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Subscription Restore";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.SubscriptionRestore;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D30000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.SubscriptionRestoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SubscriptionRestore.app/SubscriptionRestore";
+			};
+			name = Debug;
+		};
+		D30000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.SubscriptionRestoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SubscriptionRestore.app/SubscriptionRestore";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C10000000000000000000001 /* Build configuration list for PBXProject "SubscriptionRestore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D10000000000000000000001 /* Debug */,
+				D10000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C20000000000000000000001 /* Build configuration list for PBXNativeTarget "SubscriptionRestore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D20000000000000000000001 /* Debug */,
+				D20000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C30000000000000000000001 /* Build configuration list for PBXNativeTarget "SubscriptionRestoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D30000000000000000000001 /* Debug */,
+				D30000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E10000000000000000000001 /* Project object */;
+}

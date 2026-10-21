@@ -1,0 +1,34 @@
+# Hand-maintained feature / architecture map.
+# Run `make feature-map` to regenerate `.sdd/feature-map.md`.
+
+layers:
+  - id: presentation
+    name: Presentation
+    path: App/
+    description: SwiftUI screens and view composition
+  - id: domain
+    name: Domain
+    path: Sources/SubscriptionRestore/
+    description: Use cases, repositories, entitlement mapping
+  - id: data
+    name: Data / Adapters
+    path: App/
+    description: StoreKitRestoreAdapter (app target only)
+
+features:
+  - id: FTR-023
+    name: Subscription Restore
+    folder: FTR-023-subscription-restore
+    primary_layer: domain
+    modules:
+      - RestorePurchasesView
+      - SubscriptionViewModel
+      - SubscriptionRepository
+      - EntitlementMapping
+      - StoreKitRestoreAdapter
+    depends_on: []
+    related_to: []
+    shares_modules_with: []
+    provides:
+      - subscription-access
+    consumes: []

@@ -1,0 +1,32 @@
+# Hand-maintained feature / architecture map.
+# Run `make feature-map` to regenerate `.sdd/feature-map.md` (Mermaid diagrams + tables).
+# Feature status and progress percentages are filled from each feature's status.yaml.
+
+layers:
+  - id: presentation
+    name: Presentation
+    path: App/
+    description: SwiftUI / UIKit screens and view composition
+  - id: domain
+    name: Domain
+    path: Sources/
+    description: Use cases, repositories, pure business rules
+  - id: data
+    name: Data / Adapters
+    path: App/
+    description: StoreKit, networking, persistence adapters
+
+features: []
+  # Example entry (uncomment / copy when adding a feature):
+  # - id: FTR-001
+  #   name: Example Feature
+  #   folder: FTR-001-example-feature
+  #   primary_layer: domain
+  #   modules:
+  #     - ExampleViewModel
+  #     - ExampleRepository
+  #   depends_on: []           # hard prerequisites (other FTR-###)
+  #   related_to: []           # soft correlation / shared domain language
+  #   shares_modules_with: []  # features that touch overlapping modules
+  #   provides: []             # capabilities this feature exposes
+  #   consumes: []             # capabilities required from other features

@@ -9,6 +9,7 @@ REQUIRED_ROOT = [
     '.sdd/constitution.md',
     '.sdd/project/objective.md',
     '.sdd/project/tech-stack.md',
+    '.sdd/project/build.yaml',
     '.sdd/project/architecture.md',
     '.sdd/project/engineering-rules.md',
     '.sdd/project/security.md',
