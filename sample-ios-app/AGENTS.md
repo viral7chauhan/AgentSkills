@@ -17,4 +17,6 @@ Stay inside the feature plan `allowed_paths`. A plan change is a lifecycle event
 
 `IMPLEMENTED` is not `VERIFIED`. Record evidence from `make unit-test` or `make test`. A feature is verified only when CI's `make ci-gate` reports it `CLEARED`; set `ci_passed: true` only from such a run.
 
-Edit only source facts: task states, test results, and `execution.yaml` evidence. Then run `make readme`, which regenerates the `status.yaml` counts, `.sdd/traceability.yaml`, and the README status table.
+Edit only source facts: task states, test results, and `execution.yaml` evidence. Then run `make readme`, which regenerates the `status.yaml` counts, `.sdd/traceability.yaml`, `.sdd/progress.md`, `.sdd/feature-map.md`, and the README status table.
+
+For cross-feature architecture, edit `.sdd/feature-map.yaml` (depends_on, related_to, modules, provides/consumes) and run `make feature-map`.

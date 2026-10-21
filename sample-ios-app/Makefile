@@ -1,7 +1,7 @@
 SDD_SCRIPTS := ../enterprise-ios-sdd_v2/scripts
 FEATURE ?=
 
-.PHONY: test unit-test ci-gate ci build spec-check traceability execution-check validate report status status-check readme readme-check plan-change
+.PHONY: test unit-test ci-gate ci build spec-check traceability execution-check validate report status status-check progress progress-check feature-map feature-map-check readme readme-check plan-change
 
 test:
 	@python3 $(SDD_SCRIPTS)/sdd-test
@@ -12,7 +12,7 @@ unit-test:
 ci-gate:
 	@python3 $(SDD_SCRIPTS)/sdd-ci-gate
 
-ci: validate status-check readme-check test ci-gate
+ci: validate status-check progress-check feature-map-check readme-check test ci-gate
 
 build:
 	xcodebuild \
@@ -46,7 +46,20 @@ status:
 status-check:
 	@python3 $(SDD_SCRIPTS)/sdd-status --check
 
-readme: status
+progress:
+	@python3 $(SDD_SCRIPTS)/sdd-status
+	@python3 $(SDD_SCRIPTS)/sdd-progress
+
+progress-check:
+	@python3 $(SDD_SCRIPTS)/sdd-progress --check
+
+feature-map:
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map
+
+feature-map-check:
+	@python3 $(SDD_SCRIPTS)/sdd-feature-map --check
+
+readme: status progress feature-map
 	@python3 $(SDD_SCRIPTS)/sdd-report --update-readme README.md
 
 readme-check:

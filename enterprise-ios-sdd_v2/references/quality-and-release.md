@@ -5,14 +5,16 @@
 Expose every gate as a `Makefile` target and have CI call the same targets, so local and CI results agree:
 
 ```bash
-make validate        # SDD structure, plan fingerprints, traceability, execution evidence
-make status-check    # derived status counts and traceability are current
-make test            # build and test as declared in .sdd/project/build.yaml
-make ci-gate         # every claimed feature's test cases passed in this run
+make validate           # SDD structure, plan fingerprints, traceability, execution evidence
+make status-check       # derived status counts and traceability are current
+make progress-check     # .sdd/progress.md matches feature artifacts
+make feature-map-check  # .sdd/feature-map.md matches feature-map.yaml + status
+make test               # build and test as declared in .sdd/project/build.yaml
+make ci-gate            # every claimed feature's test cases passed in this run
 make lint
 ```
 
-`make ci` runs the first four in order. The package's `.github/workflows/sdd-validation.yml` template runs them on every pull request and push to the default branch, with the gate reporting even when tests fail so the log names the uncleared features.
+`make ci` runs validate, status-check, progress-check, feature-map-check, test, and ci-gate. The package's `.github/workflows/sdd-validation.yml` template runs them on every pull request and push to the default branch, with the gate reporting even when tests fail so the log names the uncleared features.
 
 Choose the gates the project enforces from: build, unit tests, integration tests, UI tests where required, lint/format, architecture and static checks, secrets scan, dependency audit, and coverage thresholds. Record the chosen set in `.sdd/project/quality-gates.md`; a gate listed there is a merge blocker.
 
@@ -24,7 +26,9 @@ Write `.sdd/adr/ADR-###-title.md` from `templates/adr.md` for a decision that co
 
 `make report` prints one line per feature. `scripts/sdd-report --update-readme README.md` writes a status table between `<!-- sdd-report:start -->` and `<!-- sdd-report:end -->`; `--check-readme` fails when that table is stale, so CI can keep a team-lead README honest.
 
-The Tech Lead view should answer: feature status, requirements implemented and verified, plan items verified, test automation status, CI status, scope violations, architecture findings, open remediation tasks, and release readiness.
+`make progress` regenerates `.sdd/progress.md`: a board for **spec ready** vs **spec implemented / verified** across all features. `make feature-map` regenerates `.sdd/feature-map.md` Mermaid diagrams from `.sdd/feature-map.yaml` (layers, depends_on, related_to, shared modules, provides/consumes).
+
+The Tech Lead view should answer: feature status, whether the spec is ready, requirements implemented and verified, plan items verified, test automation status, CI status, how features relate in the architecture, scope violations, architecture findings, open remediation tasks, and release readiness.
 
 ## Definition of Done
 

@@ -16,6 +16,11 @@ Prefer **v2** for new work. It extends the original package with bootstrap, exec
 
 For a full walkthrough of the lifecycle, repository layout, feature artifacts, traceability, MCP recommendations, and Tech Lead workflow, see **[GUIDE.md](GUIDE.md)**.
 
+Project-level views (v2):
+
+- `.sdd/progress.md` — **spec ready vs implemented** board across all features (`make progress`)
+- `.sdd/feature-map.md` — **architecture + feature correlation** Mermaid diagrams (`make feature-map`, edit `.sdd/feature-map.yaml`)
+
 ## Core workflow
 
 ```text

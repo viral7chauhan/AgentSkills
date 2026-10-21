@@ -1,0 +1,242 @@
+#!/usr/bin/env python3
+"""Generate .sdd/progress.md — project-wide feature progress board.
+
+Shows whether each feature's spec is ready and how far implementation /
+verification has progressed. Source of truth remains each feature folder;
+this file is a derived Tech Lead view.
+"""
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+FEATURES = Path('.sdd/features')
+PROGRESS = Path('.sdd/progress.md')
+START = '<!-- sdd-progress:start -->'
+END = '<!-- sdd-progress:end -->'
+
+READY_STATUSES = {
+    'READY', 'PLANNED', 'IN_PROGRESS', 'IMPLEMENTING', 'IMPLEMENTED',
+    'VALIDATING', 'CONVERGING', 'CONVERGED', 'RELEASE_READY', 'RELEASED',
+}
+IMPLEMENTED_STATUSES = {
+    'IMPLEMENTED', 'VALIDATING', 'CONVERGING', 'CONVERGED', 'RELEASE_READY', 'RELEASED',
+}
+VERIFIED_STATUSES = {'CONVERGED', 'RELEASE_READY', 'RELEASED'}
+
+
+def read(path: Path) -> str:
+    return path.read_text() if path.exists() else ''
+
+
+def field(text: str, name: str) -> str:
+    m = re.search(rf'^{re.escape(name)}:\s*(.*)$', text, re.M)
+    return m.group(1).strip().strip('"').strip("'") if m else ''
+
+
+def int_field(text: str, name: str) -> int:
+    raw = field(text, name)
+    try:
+        return int(raw)
+    except ValueError:
+        return 0
+
+
+def feature_title(root: Path) -> str:
+    heading = re.search(r'^#\s+(.+)$', read(root / 'spec.md'), re.M)
+    if heading:
+        return heading.group(1).strip()
+    return root.name
+
+
+def checklist_ready(text: str) -> tuple[bool, int, int]:
+    items = re.findall(r'^- \[([ xX])\]', text, re.M)
+    if not items:
+        return False, 0, 0
+    done = sum(1 for c in items if c.lower() == 'x')
+    return done == len(items) and len(items) > 0, done, len(items)
+
+
+def clarify_open(text: str) -> int:
+    return len(re.findall(r'\bOPEN\b', text))
+
+
+def pct(n: int, d: int) -> int:
+    return 0 if d <= 0 else round(100 * n / d)
+
+
+def bar(n: int, d: int, width: int = 10) -> str:
+    if d <= 0:
+        return '░' * width + ' n/a'
+    filled = round(width * n / d)
+    return '█' * filled + '░' * (width - filled) + f' {pct(n, d)}%'
+
+
+def yes_no(ok: bool) -> str:
+    return 'Yes' if ok else 'No'
+
+
+def analyze(root: Path) -> dict:
+    status = read(root / 'status.yaml')
+    checklist = read(root / 'checklist.md')
+    clarify = read(root / 'clarify.md')
+
+    state = (field(status, 'status') or 'UNKNOWN').upper()
+    checklist_ok, checklist_done, checklist_total = checklist_ready(checklist)
+    open_qs = clarify_open(clarify)
+
+    req_total = int_field(status, 'requirements_total')
+    req_impl = int_field(status, 'requirements_implemented')
+    req_ver = int_field(status, 'requirements_verified')
+    plan_total = int_field(status, 'plan_items_total')
+    plan_ver = int_field(status, 'plan_items_verified')
+    tasks_total = int_field(status, 'tasks_total')
+    tasks_ver = int_field(status, 'tasks_verified')
+    tests_total = int_field(status, 'test_cases_total')
+    tests_pass = int_field(status, 'test_cases_passing')
+
+    # Spec ready: checklist complete, no OPEN clarifies, and lifecycle past DRAFT
+    # (or status already READY+). Empty checklist with DRAFT = not ready.
+    spec_ready = (
+        checklist_ok
+        and open_qs == 0
+        and (state in READY_STATUSES or state == 'DRAFT' and checklist_ok)
+    )
+    if state in READY_STATUSES:
+        spec_ready = checklist_ok and open_qs == 0
+
+    # Implementation progress prefers verified requirements, else plan items.
+    impl_n, impl_d = (req_impl, req_total) if req_total else (plan_ver, plan_total)
+    ver_n, ver_d = (req_ver, req_total) if req_total else (plan_ver, plan_total)
+
+    return {
+        'id': field(status, 'feature_id') or '-'.join(root.name.split('-')[:2]),
+        'name': feature_title(root),
+        'folder': root.name,
+        'status': state,
+        'spec_ready': spec_ready,
+        'checklist': f'{checklist_done}/{checklist_total}' if checklist_total else '0/0',
+        'open_clarifies': open_qs,
+        'implemented': state in IMPLEMENTED_STATUSES or (impl_d > 0 and impl_n == impl_d),
+        'verified': state in VERIFIED_STATUSES or (ver_d > 0 and ver_n == ver_d and ver_d > 0),
+        'req_impl': req_impl,
+        'req_total': req_total,
+        'req_ver': req_ver,
+        'plan_ver': plan_ver,
+        'plan_total': plan_total,
+        'tasks_ver': tasks_ver,
+        'tasks_total': tasks_total,
+        'tests_pass': tests_pass,
+        'tests_total': tests_total,
+        'ci': field(status, 'ci_status') or 'unknown',
+        'release_ready': field(status, 'release_ready').lower() == 'true',
+        'blocking': field(status, 'blocking_items') or '[]',
+        'impl_bar': bar(impl_n, impl_d),
+        'ver_bar': bar(ver_n, ver_d),
+        'test_bar': bar(tests_pass, tests_total),
+    }
+
+
+def render(features: list[dict]) -> str:
+    if not features:
+        return '_No features yet. Create one with `./scripts/sdd-feature-create FTR-001 "Name"`._\n'
+
+    total = len(features)
+    ready = sum(1 for f in features if f['spec_ready'])
+    implemented = sum(1 for f in features if f['implemented'])
+    verified = sum(1 for f in features if f['verified'])
+    release = sum(1 for f in features if f['release_ready'])
+
+    lines = [
+        '## Summary',
+        '',
+        f'| Metric | Count | Progress |',
+        f'| --- | ---: | --- |',
+        f'| Features | {total} | |',
+        f'| Spec ready | {ready} | {bar(ready, total)} |',
+        f'| Spec implemented | {implemented} | {bar(implemented, total)} |',
+        f'| Verified / converged | {verified} | {bar(verified, total)} |',
+        f'| Release ready | {release} | {bar(release, total)} |',
+        '',
+        '## Feature board',
+        '',
+        '| Feature | Spec ready | Spec → code | Verified | Tests | Status | CI | Blocking |',
+        '| --- | --- | --- | --- | --- | --- | --- | --- |',
+    ]
+
+    for f in features:
+        blocking = f['blocking'] if f['blocking'] not in ('[]', '', 'null') else '—'
+        lines.append(
+            f"| [{f['id']}](features/{f['folder']}/spec.md) {f['name']} "
+            f"| {yes_no(f['spec_ready'])} (`{f['checklist']}` checklist"
+            f"{', ' + str(f['open_clarifies']) + ' OPEN' if f['open_clarifies'] else ''}) "
+            f"| {f['impl_bar']} "
+            f"| {f['ver_bar']} "
+            f"| {f['test_bar']} "
+            f"| `{f['status']}` "
+            f"| `{f['ci']}` "
+            f"| {blocking} |"
+        )
+
+    lines += [
+        '',
+        '## How to read this',
+        '',
+        '- **Spec ready** — checklist complete and no `OPEN` items in `clarify.md`.',
+        '- **Spec → code** — requirements (or plan items) marked implemented in `status.yaml` / `execution.yaml`.',
+        '- **Verified** — requirements (or plan items) marked `VERIFIED` with evidence; typically `CONVERGED`.',
+        '- Regenerate after `make status`: `make progress`.',
+        '',
+    ]
+    return '\n'.join(lines)
+
+
+def with_body(doc: str, body: str) -> str:
+    start, end = doc.find(START), doc.find(END)
+    if start == -1 or end == -1 or end < start:
+        # Create a full document if markers are missing.
+        return (
+            '# Feature Progress\n\n'
+            '> Generated by `scripts/sdd-progress`. Do not edit by hand.\n\n'
+            f'{START}\n\n{body.rstrip()}\n\n{END}\n'
+        )
+    return doc[: start + len(START)] + '\n\n' + body.rstrip() + '\n\n' + doc[end:]
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description='Generate .sdd/progress.md from feature artifacts.')
+    ap.add_argument('--check', action='store_true', help='fail if progress.md is stale')
+    ap.add_argument('--stdout', action='store_true', help='print the board without writing')
+    args = ap.parse_args()
+
+    roots = sorted(FEATURES.glob('FTR-*')) if FEATURES.exists() else []
+    features = [analyze(root) for root in roots]
+    body = render(features)
+
+    if args.stdout:
+        print(body)
+        return 0
+
+    current = read(PROGRESS) if PROGRESS.exists() else ''
+    expected = with_body(current, body)
+
+    if args.check:
+        if not PROGRESS.exists() or read(PROGRESS) != expected:
+            print(f'{PROGRESS}: out of date. Run `make progress` and commit the result.', file=sys.stderr)
+            return 1
+        print(f'{PROGRESS} matches feature artifacts')
+        return 0
+
+    PROGRESS.parent.mkdir(parents=True, exist_ok=True)
+    if not PROGRESS.exists() or read(PROGRESS) != expected:
+        PROGRESS.write_text(expected)
+        print(f'Updated {PROGRESS}')
+    else:
+        print(f'{PROGRESS} is already current')
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

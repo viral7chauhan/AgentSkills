@@ -28,6 +28,9 @@
 - `templates/project/release.md`
 - `templates/project/traceability.yaml`
 - `templates/project/mcp-registry.yaml`
+- `templates/project/progress.md` — generated project progress board
+- `templates/project/feature-map.yaml` — hand-maintained feature relationships
+- `templates/project/feature-map.md` — generated architecture / feature Mermaid map
 
 ### Feature
 
@@ -57,6 +60,8 @@
 - `scripts/sdd-validate` — validate project SDD structure and plan fingerprints
 - `scripts/sdd-report` — produce a Tech Lead summary, or write it into a README status table
 - `scripts/sdd-status` — derive `status.yaml` counts and `.sdd/traceability.yaml` from feature artifacts
+- `scripts/sdd-progress` — generate `.sdd/progress.md` (spec ready vs implemented board)
+- `scripts/sdd-feature-map` — generate `.sdd/feature-map.md` Mermaid diagrams from `feature-map.yaml`
 - `scripts/sdd-test` — run the tests described in `.sdd/project/build.yaml` and record per-test results
 - `scripts/sdd-ci-gate` — clear a feature only when every test case in its test plan passed in that run
 - `scripts/sdd-mcp-recommend` — recommend MCPs from project tech-stack/feature context
